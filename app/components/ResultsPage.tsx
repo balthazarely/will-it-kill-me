@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { type Product } from '@/lib/api';
 import { getScoreColor, getScoreBgColor } from '@/lib/scoreUtils';
 
@@ -9,13 +10,38 @@ interface ResultsPageProps {
   onReset: () => void;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4 },
+  },
+};
+
 export default function ResultsPage({ product, onReset }: ResultsPageProps) {
   const [expandedIngredients, setExpandedIngredients] = useState(false);
 
   return (
-    <div className="space-y-4">
+    <motion.div
+      className="space-y-4"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Product Header with Image */}
-      <div className="mb-6 flex gap-4 items-start">
+      <motion.div className="mb-6 flex gap-4 items-start" variants={itemVariants}>
         {/* Product Image */}
         {product.image && (
           <img
@@ -32,10 +58,10 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
           )}
           <h2 className="text-2xl font-bold">{product.name}</h2>
         </div>
-      </div>
+      </motion.div>
 
       {/* Score - Health Rating */}
-      <div className={`mb-6 p-6 rounded-2xl border-2 ${getScoreBgColor(product.analysis.score)}`}>
+      <motion.div className={`mb-6 p-6 rounded-2xl border-2 ${getScoreBgColor(product.analysis.score)}`} variants={itemVariants}>
         <div className="mb-4">
           <p className="text-sm text-white mb-2">Health Score</p>
           <div className="flex items-baseline gap-1">
@@ -61,16 +87,16 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
           {product.analysis.score === 2 && "⚠ Not recommended"}
           {product.analysis.score === 1 && "☠ Avoid"}
         </div>
-      </div>
+      </motion.div>
 
       {/* Verdict */}
-      <div className={`p-4 rounded-lg ${getScoreBgColor(product.analysis.score)}`}>
+      <motion.div className={`p-4 rounded-lg ${getScoreBgColor(product.analysis.score)}`} variants={itemVariants}>
         <p className="text-sm text-white leading-relaxed">{product.analysis.verdict}</p>
-      </div>
+      </motion.div>
 
       {/* Flags */}
       {product.analysis.flags.length > 0 && (
-        <div className="pt-2">
+        <motion.div className="pt-2" variants={itemVariants}>
           <div className="flex items-start gap-2 mb-2">
             <span className="text-yellow-400 text-lg mt-0.5">⚠</span>
             <div className="flex-1">
@@ -86,11 +112,11 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Nutrition Grid */}
-      <div className="pt-2">
+      <motion.div className="pt-2" variants={itemVariants}>
         <h3 className="text-sm font-semibold text-gray-400 mb-3">Nutrition per 100g</h3>
         <div className="grid grid-cols-4 gap-3">
           {[
@@ -117,16 +143,16 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Suggestion */}
-      <div className="flex gap-3 pt-2">
+      <motion.div className="flex gap-3 pt-2" variants={itemVariants}>
         <span className="text-lg">💡</span>
         <p className="text-sm text-gray-300">{product.analysis.suggestion}</p>
-      </div>
+      </motion.div>
 
       {/* Ingredients */}
-      <div className="pt-2">
+      <motion.div className="pt-2" variants={itemVariants}>
         <button
           onClick={() => setExpandedIngredients(!expandedIngredients)}
           className="w-full py-2 px-3 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium text-left hover:border-zinc-700 transition-colors flex justify-between items-center"
@@ -139,15 +165,16 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
             <p className="text-sm text-gray-300 leading-relaxed">{product.ingredients}</p>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Scan Again Button */}
-      <button
+      <motion.button
         onClick={onReset}
         className="w-full mt-6 px-4 py-3 bg-zinc-900 text-white border border-zinc-700 font-medium rounded-lg hover:border-zinc-600 transition-colors"
+        variants={itemVariants}
       >
         Scan Another Product
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 }

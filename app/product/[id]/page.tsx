@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { scanBarcode } from '@/lib/api';
 import ResultsPage from '@/app/components/ResultsPage';
+import PageTransition from '@/app/components/PageTransition';
 import { useRouter } from 'next/navigation';
 
 export default function ProductPage() {
@@ -53,16 +54,18 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="p-4">
-      <main className="w-full max-w-md mx-auto py-8">
-        <button
-          onClick={handleReset}
-          className="mb-8 flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
-        >
-          ← Back
-        </button>
-        <ResultsPage product={product} onReset={handleReset} />
-      </main>
-    </div>
+    <PageTransition>
+      <div className="p-4">
+        <main className="w-full max-w-md mx-auto py-8">
+          <button
+            onClick={handleReset}
+            className="mb-8 flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            ← Back
+          </button>
+          <ResultsPage product={product} onReset={handleReset} />
+        </main>
+      </div>
+    </PageTransition>
   );
 }

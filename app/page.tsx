@@ -1,9 +1,12 @@
 import FoodScanner from './components/FoodScanner';
+import PageTransition from './components/PageTransition';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <FoodScanner />
-    </div>
+    <PageTransition>
+      <div className="min-h-screen bg-black text-white">
+        <FoodScanner />
+      </div>
+    </PageTransition>
   );
 }

@@ -19,6 +19,7 @@ export default function FoodScanner() {
   const [lastScannedBarcode, setLastScannedBarcode] = useState<string | null>(
     null,
   );
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const queryClient = useQueryClient();
   const { history, addScan } = useScanHistory();
@@ -37,11 +38,12 @@ export default function FoodScanner() {
 
   // Navigate to product page when product is loaded
   useEffect(() => {
-    if (product && lastScannedBarcode) {
+    if (product && lastScannedBarcode && !isNavigating) {
+      setIsNavigating(true);
       addScan(lastScannedBarcode, product.name);
       router.push(`/product/${lastScannedBarcode}`);
     }
-  }, [product, lastScannedBarcode, router, addScan]);
+  }, [product, lastScannedBarcode, router, addScan, isNavigating]);
 
   const handleScan = () => {
     if (!barcodeInput.trim()) {
@@ -55,6 +57,7 @@ export default function FoodScanner() {
 
   const handleBarcodeScan = (scannedCode: string) => {
     setError("");
+    setUseCamera(false);
     setLastScannedBarcode(scannedCode);
     setBarcodeToScan(scannedCode);
   };
@@ -85,7 +88,13 @@ export default function FoodScanner() {
     <div className="w-full min-h-screen bg-zinc-950">
       {/* Loading/Scanning State */}
       {loading && barcodeToScan && (
-        <ScanningScreen productName={barcodeToScan} />
+        <ScanningScreen
+          productName={barcodeToScan}
+          onCancel={() => {
+            setBarcodeToScan(null);
+            setIsNavigating(false);
+          }}
+        />
       )}
 
       {/* Camera View */}
@@ -98,19 +107,16 @@ export default function FoodScanner() {
 
       {/* Error Screen */}
       {error && lastScannedBarcode && !loading && !product && (
-        <ErrorScreen
-          barcode={lastScannedBarcode}
-          onBack={handleErrorBack}
-        />
+        <ErrorScreen barcode={lastScannedBarcode} onBack={handleErrorBack} />
       )}
 
       {/* Initial Input Screen with Header */}
-      {!loading && !useCamera && !product && !error && (
-        <div className="w-full min-h-screen bg-zinc-950 flex flex-col">
-          <div className="flex justify-center pt-2">
+      {!loading && !useCamera && !product && !error && !isNavigating && (
+        <div className="w-full h-screen bg-zinc-950 flex flex-col overflow-hidden">
+          <div className="flex justify-center pt-2 flex-shrink-0">
             <img src="/logo.png" alt="Scanr" className="h-32 w-auto" />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 overflow-hidden">
             <InitialScreen
               barcode={barcodeInput}
               onBarcodeChange={setBarcodeInput}
@@ -118,7 +124,10 @@ export default function FoodScanner() {
               onCameraClick={() => setUseCamera(true)}
               loading={loading}
               recentScans={history}
-              onRecentScanClick={(barcode) => router.push(`/product/${barcode}`)}
+              onRecentScanClick={(barcode) => {
+                setIsNavigating(true);
+                router.push(`/product/${barcode}`);
+              }}
             />
           </div>
         </div>
