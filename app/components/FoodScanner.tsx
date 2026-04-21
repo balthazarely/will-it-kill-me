@@ -1,311 +1,127 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Scanner } from '@yudiel/react-qr-scanner';
-import { scanBarcode, type Product } from '@/lib/api';
+import { useState } from "react";
+import { scanBarcode, type Product } from "@/lib/api";
+import InitialScreen from "./InitialScreen";
+import CameraScanner from "./CameraScanner";
+import ResultsPage from "./ResultsPage";
 
 export default function FoodScanner() {
-  const [barcode, setBarcode] = useState('');
+  const [barcode, setBarcode] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [product, setProduct] = useState<Product | null>(null);
-  const [expandedIngredients, setExpandedIngredients] = useState(false);
   const [useCamera, setUseCamera] = useState(false);
-  const [detectedBarcode, setDetectedBarcode] = useState('');
+  const [detectedBarcode, setDetectedBarcode] = useState("");
   const [confirmingBarcode, setConfirmingBarcode] = useState(false);
 
   const handleScan = async () => {
     if (!barcode.trim()) {
-      setError('Please enter a barcode');
+      setError("Please enter a barcode");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     setProduct(null);
 
     try {
       const data = await scanBarcode(barcode);
       setProduct(data);
-      setBarcode('');
+      setBarcode("");
     } catch (err) {
-      setError('Product not found. Please check the barcode and try again.');
+      setError("Product not found. Please check the barcode and try again.");
       setProduct(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score <= 2) return 'text-green-400';
-    if (score === 3) return 'text-yellow-400';
-    return 'text-red-400';
+  const handleCameraUseBarcode = () => {
+    setConfirmingBarcode(true);
   };
 
-  const getScoreBgColor = (score: number) => {
-    if (score <= 2) return 'bg-green-400/10 border-green-400/30';
-    if (score === 3) return 'bg-yellow-400/10 border-yellow-400/30';
-    return 'bg-red-400/10 border-red-400/30';
+  const handleCameraCancel = () => {
+    setUseCamera(false);
+    setConfirmingBarcode(false);
+    setDetectedBarcode("");
+  };
+
+  const handleConfirmedBarcodeScan = async () => {
+    setUseCamera(false);
+    setConfirmingBarcode(false);
+    setLoading(true);
+    setError("");
+    setProduct(null);
+
+    try {
+      const data = await scanBarcode(detectedBarcode);
+      setProduct(data);
+      setDetectedBarcode("");
+    } catch (err) {
+      setError("Product not found. Please check the barcode and try again.");
+      setProduct(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRescan = () => {
+    setDetectedBarcode("");
+    setConfirmingBarcode(false);
+  };
+
+  const handleReset = () => {
+    setProduct(null);
+    setError("");
+    setBarcode("");
   };
 
   return (
     <div className="w-full">
       {/* Camera View */}
-      {useCamera && !confirmingBarcode && (
-        <div className="mb-8">
-          <div className="w-full rounded-lg bg-black mb-3 overflow-hidden" style={{ aspectRatio: '1' }}>
-            <Scanner
-              onScan={async (result: any) => {
-                if (result && result.length > 0) {
-                  const detectedCode = result[0]?.rawValue || result[0]?.getText?.() || result[0];
-                  if (detectedCode) {
-                    setUseCamera(false);
-                    setLoading(true);
-                    setError('');
-                    setProduct(null);
+      {useCamera && (
+        <CameraScanner
+          detectedBarcode={detectedBarcode}
+          onBarcodeChange={setDetectedBarcode}
+          onConfirm={
+            confirmingBarcode
+              ? handleConfirmedBarcodeScan
+              : handleCameraUseBarcode
+          }
+          onCancel={confirmingBarcode ? handleRescan : handleCameraCancel}
+          confirmingBarcode={confirmingBarcode}
+          onScannedBarcode={(code) => {
+            setUseCamera(false);
+          }}
+          setLoading={setLoading}
+          setError={setError}
+          setProduct={setProduct}
+        />
+      )}
 
-                    try {
-                      const data = await scanBarcode(detectedCode);
-                      setProduct(data);
-                      setBarcode('');
-                    } catch (err) {
-                      setError('Product not found. Please check the barcode and try again.');
-                      setProduct(null);
-                    } finally {
-                      setLoading(false);
-                    }
-                  }
-                }
-              }}
-            />
-          </div>
-          <p className="text-xs text-gray-400 text-center mb-3">Point camera at barcode or enter manually below</p>
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="Or type barcode number..."
-            value={detectedBarcode}
-            onChange={(e) => setDetectedBarcode(e.target.value)}
-            className="w-full px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white mb-3"
+      {/* Initial Input Screen */}
+      {!useCamera && !product && (
+        <>
+          <InitialScreen
+            barcode={barcode}
+            onBarcodeChange={setBarcode}
+            onScan={handleScan}
+            onCameraClick={() => setUseCamera(true)}
+            loading={loading}
           />
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                if (detectedBarcode) {
-                  setConfirmingBarcode(true);
-                }
-              }}
-              disabled={!detectedBarcode}
-              className="flex-1 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-            >
-              Use
-            </button>
-            <button
-              onClick={() => {
-                setUseCamera(false);
-                setConfirmingBarcode(false);
-                setDetectedBarcode('');
-              }}
-              className="flex-1 px-4 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* Barcode Confirmation */}
-      {confirmingBarcode && (
-        <div className="mb-8 p-4 bg-zinc-900 border border-zinc-700 rounded-lg">
-          <p className="text-sm text-gray-400 mb-3">Scanned barcode:</p>
-          <input
-            type="text"
-            value={detectedBarcode}
-            onChange={(e) => setDetectedBarcode(e.target.value)}
-            className="w-full px-4 py-2 bg-black border border-zinc-700 rounded-lg text-white text-center font-mono mb-3 focus:outline-none focus:ring-2 focus:ring-white"
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                setBarcode(detectedBarcode);
-                setDetectedBarcode('');
-                setConfirmingBarcode(false);
-                setUseCamera(false);
-              }}
-              className="flex-1 px-3 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-colors text-sm"
-            >
-              Use This
-            </button>
-            <button
-              onClick={() => {
-                setDetectedBarcode('');
-                setConfirmingBarcode(false);
-                setUseCamera(true);
-              }}
-              className="flex-1 px-3 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
-            >
-              Rescan
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Input Section */}
-      {!useCamera && (
-        <div className="mb-8">
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="Enter barcode number"
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') handleScan();
-            }}
-            disabled={loading}
-            className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent mb-3"
-          />
-          <div className="flex gap-3">
-            <button
-              onClick={handleScan}
-              disabled={loading}
-              className="flex-1 px-4 py-3 bg-white text-black font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? 'Scanning...' : 'Scan'}
-            </button>
-            <button
-              onClick={() => setUseCamera(true)}
-              disabled={loading}
-              className="flex-1 px-4 py-3 bg-zinc-800 text-white font-medium rounded-lg border border-zinc-700 hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              title="Use camera to scan barcode"
-            >
-              📷
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <p className="text-red-400 text-sm">{error}</p>
-        </div>
-      )}
-
-      {/* Result Card */}
-      {product && (
-        <div className="space-y-4">
-          {/* Product Header */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-3">{product.name}</h2>
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((dot) => (
-                <div
-                  key={dot}
-                  className={`w-2 h-2 rounded-full ${
-                    dot <= product.analysis.score
-                      ? getScoreColor(product.analysis.score)
-                      : 'bg-zinc-700'
-                  }`}
-                />
-              ))}
-              <span className={`ml-2 font-medium ${getScoreColor(product.analysis.score)}`}>
-                {product.analysis.score}/5
-              </span>
-            </div>
-          </div>
-
-          {/* Verdict */}
-          <div className={`p-4 rounded-lg border ${getScoreBgColor(product.analysis.score)}`}>
-            <p className="text-sm text-gray-300">{product.analysis.verdict}</p>
-          </div>
-
-          {/* Flags */}
-          {product.analysis.flags.length > 0 && (
-            <div className="pt-2">
-              <div className="flex items-start gap-2 mb-2">
-                <span className="text-yellow-400 text-lg mt-0.5">⚠</span>
-                <div className="flex-1">
-                  <div className="flex flex-wrap gap-2">
-                    {product.analysis.flags.map((flag, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-block px-3 py-1 bg-zinc-800 border border-zinc-700 rounded-full text-xs text-gray-300"
-                      >
-                        {flag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+          {/* Error State */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
-
-          {/* Nutrition Grid */}
-          <div className="pt-2">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3">Nutrition per 100g</h3>
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                { label: 'Calories', value: product.nutriments['energy-kcal_100g'], unit: 'kcal' },
-                { label: 'Fat', value: product.nutriments['fat_100g'], unit: 'g' },
-                { label: 'Sat. Fat', value: product.nutriments['saturated-fat_100g'], unit: 'g' },
-                { label: 'Carbs', value: product.nutriments['carbohydrates_100g'], unit: 'g' },
-                { label: 'Sugar', value: product.nutriments['sugars_100g'], unit: 'g' },
-                { label: 'Protein', value: product.nutriments['proteins_100g'], unit: 'g' },
-                { label: 'Salt', value: product.nutriments['salt_100g'], unit: 'g' },
-                { label: 'Fiber', value: product.nutriments['fiber_100g'], unit: 'g' },
-              ].map((nutrient) => (
-                <div
-                  key={nutrient.label}
-                  className="bg-zinc-900 p-3 rounded-lg border border-zinc-800"
-                >
-                  <p className="text-xs text-gray-500 mb-1">{nutrient.label}</p>
-                  <p className="text-lg font-semibold">
-                    {nutrient.value !== null && nutrient.value !== undefined
-                      ? nutrient.value.toFixed(1)
-                      : '—'}
-                  </p>
-                  <p className="text-xs text-gray-600">{nutrient.unit}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Suggestion */}
-          <div className="flex gap-3 pt-2">
-            <span className="text-lg">💡</span>
-            <p className="text-sm text-gray-300">{product.analysis.suggestion}</p>
-          </div>
-
-          {/* Ingredients */}
-          <div className="pt-2">
-            <button
-              onClick={() => setExpandedIngredients(!expandedIngredients)}
-              className="w-full py-2 px-3 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium text-left hover:border-zinc-700 transition-colors flex justify-between items-center"
-            >
-              Ingredients
-              <span className="text-xs text-gray-500">{expandedIngredients ? '▼' : '▶'}</span>
-            </button>
-            {expandedIngredients && (
-              <div className="mt-3 p-3 bg-zinc-900 rounded-lg border border-zinc-800">
-                <p className="text-sm text-gray-300 leading-relaxed">{product.ingredients}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Scan Again Button */}
-          <button
-            onClick={() => {
-              setProduct(null);
-              setError('');
-              setBarcode('');
-            }}
-            className="w-full mt-6 px-4 py-3 bg-zinc-900 text-white border border-zinc-700 font-medium rounded-lg hover:border-zinc-600 transition-colors"
-          >
-            Scan Another Product
-          </button>
-        </div>
+        </>
       )}
+
+      {/* Results Page */}
+      {product && <ResultsPage product={product} onReset={handleReset} />}
     </div>
   );
 }
