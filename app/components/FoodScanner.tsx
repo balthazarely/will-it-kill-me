@@ -5,7 +5,6 @@ import Quagga from '@ericblade/quagga2';
 import { scanBarcode, type Product } from '@/lib/api';
 
 export default function FoodScanner() {
-  const videoRef = useRef<HTMLDivElement>(null);
 
   const [barcode, setBarcode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +24,7 @@ export default function FoodScanner() {
             inputStream: {
               name: 'Live',
               type: 'LiveStream',
-              target: videoRef.current,
+              target: '#quagga-scanner',
               constraints: {
                 facingMode: 'environment',
               },
@@ -130,7 +129,7 @@ export default function FoodScanner() {
       {useCamera && (
         <div className="mb-8">
           <div
-            ref={videoRef}
+            id="quagga-scanner"
             className="w-full rounded-lg bg-black mb-3 overflow-hidden"
             style={{ aspectRatio: '1' }}
           />
