@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import jsQR from 'jsqr';
+import Quagga from '@ericblade/quagga2';
 import { scanBarcode, type Product } from '@/lib/api';
 
 export default function FoodScanner() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number | undefined>(undefined);
+  const videoRef = useRef<HTMLDivElement>(null);
 
   const [barcode, setBarcode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,14 +18,53 @@ export default function FoodScanner() {
   useEffect(() => {
     if (!useCamera) return;
 
-    const startCamera = async () => {
+    const initQuagga = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
+        await Quagga.init(
+          {
+            inputStream: {
+              name: 'Live',
+              type: 'LiveStream',
+              target: videoRef.current,
+              constraints: {
+                facingMode: 'environment',
+              },
+            },
+            decoder: {
+              readers: [
+                'code_128_reader',
+                'ean_reader',
+                'ean_8_reader',
+                'upc_reader',
+                'upc_e_reader',
+              ],
+              debug: {
+                showCanvas: false,
+                showPatternLabel: false,
+                showFrequency: false,
+                showErrors: false,
+              },
+            },
+            locate: true,
+          },
+          (err) => {
+            if (err) {
+              setCameraError('Failed to initialize camera');
+              setUseCamera(false);
+              return;
+            }
+
+            Quagga.start();
+
+            Quagga.onDetected((result) => {
+              if (result.codeResult.code) {
+                setBarcode(result.codeResult.code);
+                setUseCamera(false);
+                Quagga.stop();
+              }
+            });
+          }
+        );
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Unable to access camera';
         setCameraError(msg);
@@ -35,54 +72,15 @@ export default function FoodScanner() {
       }
     };
 
-    startCamera();
+    initQuagga();
 
     return () => {
-      if (videoRef.current?.srcObject) {
-        (videoRef.current.srcObject as MediaStream)
-          .getTracks()
-          .forEach((track) => track.stop());
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      try {
+        Quagga.stop();
+      } catch (e) {
+        // Quagga might not be initialized
       }
     };
-  }, [useCamera]);
-
-  const scanFrame = () => {
-    if (!videoRef.current || !canvasRef.current) {
-      animationFrameRef.current = requestAnimationFrame(scanFrame);
-      return;
-    }
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) {
-      animationFrameRef.current = requestAnimationFrame(scanFrame);
-      return;
-    }
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-    if (code) {
-      setBarcode(code.data);
-      setUseCamera(false);
-    }
-
-    animationFrameRef.current = requestAnimationFrame(scanFrame);
-  };
-
-  useEffect(() => {
-    if (useCamera && videoRef.current?.readyState === 4) {
-      animationFrameRef.current = requestAnimationFrame(scanFrame);
-    }
   }, [useCamera]);
 
   const handleScan = async () => {
@@ -131,14 +129,11 @@ export default function FoodScanner() {
       {/* Camera View */}
       {useCamera && (
         <div className="mb-8">
-          <video
+          <div
             ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full rounded-lg bg-black mb-3"
+            className="w-full rounded-lg bg-black mb-3 overflow-hidden"
             style={{ aspectRatio: '1' }}
           />
-          <canvas ref={canvasRef} className="hidden" />
           <button
             onClick={() => {
               setUseCamera(false);
