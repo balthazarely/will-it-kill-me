@@ -57,13 +57,10 @@ export default function ProductPage() {
       <main className="w-full max-w-md mx-auto py-8">
         <button
           onClick={handleReset}
-          className="mb-6 flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
+          className="mb-8 flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
         >
           ← Back
         </button>
-        <div className="mb-8">
-          <img src="/logo.png" alt="Scanr" className="h-32 w-auto" />
-        </div>
         <ResultsPage product={product} onReset={handleReset} />
       </main>
     </div>

@@ -23,25 +23,29 @@ export default function CameraScanner({
   };
 
   return (
-    <div className="flex flex-col  bg-zinc-950 text-white items-center justify-center gap-6 px-8">
-      {/* Camera View */}
-      <div className="w-full max-w-md">
-        <div
-          className="w-full rounded-2xl bg-black overflow-hidden mb-4"
-          style={{ aspectRatio: "1" }}
-        >
-          <Scanner onScan={handleScan} />
-        </div>
-        <p className="text-sm text-white/60 text-center mb-6">
+    <div className="flex flex-col min-h-screen w-full bg-zinc-950 text-white items-center justify-center gap-6 px-8">
+      {/* Camera View - matches ScanningScreen viewfinder */}
+      <div className="relative w-[220px] h-[220px] rounded-2xl overflow-hidden bg-black">
+        <Scanner onScan={handleScan} />
+      </div>
+
+      {/* Instruction Text */}
+      <div className="text-center">
+        <p className="text-[17px] font-semibold tracking-tight mb-1.5">
+          Scan Barcode
+        </p>
+        <p className="text-[13px] text-white/40 font-medium">
           Point camera at barcode
         </p>
-        <button
-          onClick={onCancel}
-          className="w-full px-4 py-3 bg-white/10 text-white font-medium rounded-xl hover:bg-white/20 transition-colors border border-white/10"
-        >
-          Cancel
-        </button>
       </div>
+
+      {/* Cancel Button */}
+      <button
+        onClick={onCancel}
+        className="mt-4 px-6 py-3 bg-white/10 text-white font-medium rounded-xl hover:bg-white/20 transition-colors border border-white/10"
+      >
+        Cancel
+      </button>
     </div>
   );
 }
