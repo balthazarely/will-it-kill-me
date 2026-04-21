@@ -5,6 +5,7 @@ import { scanBarcode, type Product } from "@/lib/api";
 import InitialScreen from "./InitialScreen";
 import CameraScanner from "./CameraScanner";
 import ResultsPage from "./ResultsPage";
+import ScanningScreen from "./ScanningScreen";
 
 export default function FoodScanner() {
   const [barcode, setBarcode] = useState("");
@@ -14,6 +15,7 @@ export default function FoodScanner() {
   const [useCamera, setUseCamera] = useState(false);
   const [detectedBarcode, setDetectedBarcode] = useState("");
   const [confirmingBarcode, setConfirmingBarcode] = useState(false);
+  const [scanningBarcode, setScanningBarcode] = useState("");
 
   const handleScan = async () => {
     if (!barcode.trim()) {
@@ -24,6 +26,7 @@ export default function FoodScanner() {
     setLoading(true);
     setError("");
     setProduct(null);
+    setScanningBarcode(barcode);
 
     try {
       const data = await scanBarcode(barcode);
@@ -34,6 +37,7 @@ export default function FoodScanner() {
       setProduct(null);
     } finally {
       setLoading(false);
+      setScanningBarcode("");
     }
   };
 
@@ -53,6 +57,7 @@ export default function FoodScanner() {
     setLoading(true);
     setError("");
     setProduct(null);
+    setScanningBarcode(detectedBarcode);
 
     try {
       const data = await scanBarcode(detectedBarcode);
@@ -63,6 +68,7 @@ export default function FoodScanner() {
       setProduct(null);
     } finally {
       setLoading(false);
+      setScanningBarcode("");
     }
   };
 
@@ -79,8 +85,13 @@ export default function FoodScanner() {
 
   return (
     <div className="w-full">
+      {/* Loading/Scanning State */}
+      {loading && (
+        <ScanningScreen productName={scanningBarcode} />
+      )}
+
       {/* Camera View */}
-      {useCamera && (
+      {!loading && useCamera && (
         <CameraScanner
           detectedBarcode={detectedBarcode}
           onBarcodeChange={setDetectedBarcode}
@@ -101,7 +112,7 @@ export default function FoodScanner() {
       )}
 
       {/* Initial Input Screen */}
-      {!useCamera && !product && (
+      {!loading && !useCamera && !product && (
         <>
           <InitialScreen
             barcode={barcode}
@@ -121,7 +132,7 @@ export default function FoodScanner() {
       )}
 
       {/* Results Page */}
-      {product && <ResultsPage product={product} onReset={handleReset} />}
+      {!loading && product && <ResultsPage product={product} onReset={handleReset} />}
     </div>
   );
 }
