@@ -22,8 +22,7 @@ export default function FoodScanner() {
         await Quagga.init(
           {
             inputStream: {
-              name: 'Live',
-              type: 'LiveStream',
+              type: 'LiveStream' as const,
               target: '#quagga-scanner',
               constraints: {
                 facingMode: 'environment',
@@ -37,12 +36,6 @@ export default function FoodScanner() {
                 'upc_reader',
                 'upc_e_reader',
               ],
-              debug: {
-                showCanvas: false,
-                showPatternLabel: false,
-                showFrequency: false,
-                showErrors: false,
-              },
             },
             locate: true,
           },
