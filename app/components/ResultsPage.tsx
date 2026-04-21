@@ -15,8 +15,8 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
+      staggerChildren: 0.06,
+      delayChildren: 0.05,
     },
   },
 };
@@ -26,7 +26,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4 },
+    transition: { duration: 0.2 },
   },
 };
 
@@ -115,6 +115,14 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
         </motion.div>
       )}
 
+      {/* Suggestion */}
+      {product.analysis.suggestion && (
+        <motion.div className="flex gap-3 p-4 bg-zinc-900/50 border border-zinc-700 rounded-lg" variants={itemVariants}>
+          <span className="text-lg flex-shrink-0">💡</span>
+          <p className="text-sm text-gray-300">{product.analysis.suggestion}</p>
+        </motion.div>
+      )}
+
       {/* Nutrition Grid */}
       <motion.div className="pt-2" variants={itemVariants}>
         <h3 className="text-sm font-semibold text-gray-400 mb-3">Nutrition per 100g</h3>
@@ -143,12 +151,6 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
             </div>
           ))}
         </div>
-      </motion.div>
-
-      {/* Suggestion */}
-      <motion.div className="flex gap-3 pt-2" variants={itemVariants}>
-        <span className="text-lg">💡</span>
-        <p className="text-sm text-gray-300">{product.analysis.suggestion}</p>
       </motion.div>
 
       {/* Ingredients */}

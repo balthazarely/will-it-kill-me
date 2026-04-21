@@ -6,8 +6,8 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.1,
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
     },
   },
 };
@@ -17,7 +17,7 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4 },
+    transition: { duration: 0.2 },
   },
 };
 
@@ -42,21 +42,26 @@ export default function InitialScreen({
 }: InitialScreenProps) {
   return (
     <motion.div
-      className="flex flex-col h-full bg-zinc-950 text-white items-center justify-center gap-8 px-8"
+      className="flex flex-col h-full bg-zinc-950 text-white items-center justify-start gap-6 px-8 pt-6 pb-8"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
+      {/* Subtitle */}
+      <motion.p className="text-lg text-white/70 text-center" variants={itemVariants}>
+        Scan barcodes to check product ingredients and health impact
+      </motion.p>
+
       {/* Camera Button + Input Section */}
       <motion.div className="w-full max-w-sm flex flex-col gap-8" variants={itemVariants}>
         {/* Camera Button - Large & Primary */}
         <button
           onClick={onCameraClick}
           disabled={loading}
-          className="w-full px-8 py-6 bg-gradient-to-r from-violet-600 to-violet-500 text-white font-semibold rounded-2xl hover:from-violet-700 hover:to-violet-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-lg shadow-lg hover:shadow-violet-500/30"
+          className="w-full px-8 py-6 bg-gradient-to-r from-violet-600 to-violet-500 text-white font-semibold rounded-2xl hover:from-violet-700 hover:to-violet-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all text-lg shadow-lg hover:shadow-violet-500/30"
           title="Use camera to scan barcode"
         >
-          📷 Open Camera
+          📷 Scan with Camera
         </button>
 
         {/* Divider */}
@@ -83,12 +88,15 @@ export default function InitialScreen({
           <button
             onClick={onScan}
             disabled={loading || !barcode.trim()}
-            className="w-full px-4 py-3 bg-white/10 text-white font-medium rounded-xl hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors border border-white/10"
+            className="w-full px-4 py-3 bg-white/10 text-white font-medium rounded-xl hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors border border-white/10"
           >
-            {loading ? "Scanning..." : "Scan Barcode"}
+            {loading ? "Scanning..." : "Search Barcode"}
           </button>
         </div>
       </motion.div>
+
+      {/* Spacer */}
+      <div className="flex-1" />
 
       {/* Recent Scans */}
       {recentScans && recentScans.length > 0 && (
@@ -99,7 +107,7 @@ export default function InitialScreen({
               <button
                 key={scan.barcode}
                 onClick={() => onRecentScanClick?.(scan.barcode)}
-                className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white/90 hover:bg-white/20 hover:border-white/30 transition-colors"
+                className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white/90 hover:bg-white/20 hover:border-white/30 cursor-pointer transition-colors"
               >
                 {scan.name}
               </button>

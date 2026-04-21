@@ -114,7 +114,7 @@ export default function FoodScanner() {
       {!loading && !useCamera && !product && !error && !isNavigating && (
         <div className="w-full h-screen bg-zinc-950 flex flex-col overflow-hidden">
           <div className="flex justify-center pt-2 flex-shrink-0">
-            <img src="/logo.png" alt="Scanr" className="h-32 w-auto" />
+            <img src="/logo.png" alt="Scanr" className="h-48 w-auto" />
           </div>
           <div className="flex-1 overflow-hidden">
             <InitialScreen
