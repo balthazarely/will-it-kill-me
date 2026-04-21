@@ -26,24 +26,12 @@ export default function CameraScanner({
   setError,
   setProduct,
 }: CameraScannerProps) {
-  const handleScan = async (result: any) => {
+  const handleScan = (result: any) => {
     if (result && result.length > 0) {
       const detectedCode = result[0]?.rawValue || result[0]?.getText?.() || result[0];
+      console.log('Barcode detected:', detectedCode);
       if (detectedCode) {
-        onScannedBarcode(detectedCode);
-        setLoading(true);
-        setError('');
-        setProduct(null);
-
-        try {
-          const data = await scanBarcode(detectedCode);
-          setProduct(data);
-        } catch (err) {
-          setError('Product not found. Please check the barcode and try again.');
-          setProduct(null);
-        } finally {
-          setLoading(false);
-        }
+        onBarcodeChange(detectedCode);
       }
     }
   };

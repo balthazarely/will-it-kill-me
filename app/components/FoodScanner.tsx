@@ -52,6 +52,7 @@ export default function FoodScanner() {
   };
 
   const handleConfirmedBarcodeScan = async () => {
+    console.log("Scanning barcode from camera:", detectedBarcode);
     setUseCamera(false);
     setConfirmingBarcode(false);
     setLoading(true);
