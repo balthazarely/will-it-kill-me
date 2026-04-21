@@ -13,6 +13,8 @@ export default function FoodScanner() {
   const [expandedIngredients, setExpandedIngredients] = useState(false);
   const [useCamera, setUseCamera] = useState(false);
   const [cameraError, setCameraError] = useState('');
+  const [detectedBarcode, setDetectedBarcode] = useState('');
+  const [confirmingBarcode, setConfirmingBarcode] = useState(false);
 
   useEffect(() => {
     if (!useCamera) return;
@@ -50,8 +52,8 @@ export default function FoodScanner() {
 
             Quagga.onDetected((result) => {
               if (result.codeResult.code) {
-                setBarcode(result.codeResult.code);
-                setUseCamera(false);
+                setDetectedBarcode(result.codeResult.code);
+                setConfirmingBarcode(true);
                 Quagga.stop();
               }
             });
@@ -119,22 +121,60 @@ export default function FoodScanner() {
       )}
 
       {/* Camera View */}
-      {useCamera && (
+      {useCamera && !confirmingBarcode && (
         <div className="mb-8">
           <div
             id="quagga-scanner"
             className="w-full rounded-lg bg-black mb-3 overflow-hidden"
             style={{ aspectRatio: '1' }}
           />
+          <p className="text-xs text-gray-400 text-center mb-3">Point camera at barcode</p>
           <button
             onClick={() => {
               setUseCamera(false);
               setCameraError('');
+              setConfirmingBarcode(false);
             }}
             className="w-full px-4 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
           >
             Cancel
           </button>
+        </div>
+      )}
+
+      {/* Barcode Confirmation */}
+      {confirmingBarcode && (
+        <div className="mb-8 p-4 bg-zinc-900 border border-zinc-700 rounded-lg">
+          <p className="text-sm text-gray-400 mb-3">Detected barcode:</p>
+          <input
+            type="text"
+            value={detectedBarcode}
+            onChange={(e) => setDetectedBarcode(e.target.value)}
+            className="w-full px-4 py-2 bg-black border border-zinc-700 rounded-lg text-white text-center font-mono mb-3 focus:outline-none focus:ring-2 focus:ring-white"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setBarcode(detectedBarcode);
+                setDetectedBarcode('');
+                setConfirmingBarcode(false);
+                setUseCamera(false);
+              }}
+              className="flex-1 px-3 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 transition-colors text-sm"
+            >
+              Use This
+            </button>
+            <button
+              onClick={() => {
+                setDetectedBarcode('');
+                setConfirmingBarcode(false);
+                setUseCamera(true);
+              }}
+              className="flex-1 px-3 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
+            >
+              Rescan
+            </button>
+          </div>
         </div>
       )}
 
