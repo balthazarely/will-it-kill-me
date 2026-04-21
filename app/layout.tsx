@@ -16,11 +16,22 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Scanr - Food Health Scanner",
   description: "Scan products and analyze their health impact with AI",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Scanr",
+  },
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#a78bfa",
 };
 
 export default function RootLayout({
