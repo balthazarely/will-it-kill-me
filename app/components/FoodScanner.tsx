@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Quagga from '@ericblade/quagga2';
+import { Html5QrcodeScanner, type Html5QrcodeScannerConfig } from 'html5-qrcode';
 import { scanBarcode, type Product } from '@/lib/api';
 
 export default function FoodScanner() {
@@ -16,63 +16,56 @@ export default function FoodScanner() {
   const [detectedBarcode, setDetectedBarcode] = useState('');
   const [confirmingBarcode, setConfirmingBarcode] = useState(false);
 
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+
   useEffect(() => {
     if (!useCamera) return;
 
-    const initQuagga = async () => {
-      try {
-        await Quagga.init(
-          {
-            inputStream: {
-              type: 'LiveStream' as const,
-              target: '#quagga-scanner',
-              constraints: {
-                facingMode: 'environment',
-              },
-            },
-            decoder: {
-              readers: [
-                'code_128_reader',
-                'ean_reader',
-                'ean_8_reader',
-                'upc_reader',
-                'upc_e_reader',
-              ],
-            },
-            locate: true,
-          },
-          (err) => {
-            if (err) {
-              setCameraError('Failed to initialize camera');
-              setUseCamera(false);
-              return;
-            }
-
-            Quagga.start();
-
-            Quagga.onDetected((result) => {
-              if (result.codeResult.code) {
-                setDetectedBarcode(result.codeResult.code);
-                setConfirmingBarcode(true);
-                Quagga.stop();
-              }
-            });
-          }
-        );
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unable to access camera';
-        setCameraError(msg);
-        setUseCamera(false);
-      }
+    const config: Html5QrcodeScannerConfig = {
+      fps: 10,
+      qrbox: { width: 250, height: 250 },
+      aspectRatio: 1.0,
+      supportedFormats: [
+        'QR_CODE',
+        'UPC_A',
+        'UPC_E',
+        'CODE_128',
+        'CODE_39',
+        'EAN_13',
+        'EAN_8',
+        'ITF',
+        'CODABAR',
+      ],
     };
 
-    initQuagga();
+    const scanner = new Html5QrcodeScanner('html5-qrcode-full', config, false);
+    scannerRef.current = scanner;
+
+    const onScanSuccess = (decodedText: string) => {
+      setDetectedBarcode(decodedText);
+      setConfirmingBarcode(true);
+      scanner.pause();
+    };
+
+    const onScanError = () => {
+      // Silently ignore scan errors
+    };
+
+    try {
+      scanner.render(onScanSuccess, onScanError);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unable to access camera';
+      setCameraError(msg);
+      setUseCamera(false);
+    }
 
     return () => {
-      try {
-        Quagga.stop();
-      } catch (e) {
-        // Quagga might not be initialized
+      if (scannerRef.current) {
+        try {
+          scannerRef.current.clear();
+        } catch (e) {
+          // Scanner might already be cleared
+        }
       }
     };
   }, [useCamera]);
@@ -124,7 +117,7 @@ export default function FoodScanner() {
       {useCamera && !confirmingBarcode && (
         <div className="mb-8">
           <div
-            id="quagga-scanner"
+            id="html5-qrcode-full"
             className="w-full rounded-lg bg-black mb-3 overflow-hidden"
             style={{ aspectRatio: '1' }}
           />
@@ -168,7 +161,9 @@ export default function FoodScanner() {
               onClick={() => {
                 setDetectedBarcode('');
                 setConfirmingBarcode(false);
-                setUseCamera(true);
+                if (scannerRef.current) {
+                  scannerRef.current.resume();
+                }
               }}
               className="flex-1 px-3 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
             >
