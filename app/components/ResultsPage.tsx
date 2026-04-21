@@ -14,29 +14,58 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
 
   return (
     <div className="space-y-4">
-      {/* Product Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-3">{product.name}</h2>
-        <div className="flex items-center gap-2">
-          {[1, 2, 3, 4, 5].map((dot) => (
-            <div
-              key={dot}
-              className={`w-2 h-2 rounded-full ${
-                dot <= product.analysis.score
-                  ? getScoreColor(product.analysis.score)
-                  : 'bg-zinc-700'
-              }`}
-            />
-          ))}
-          <span className={`ml-2 font-medium ${getScoreColor(product.analysis.score)}`}>
-            {product.analysis.score}/5
-          </span>
+      {/* Product Header with Image */}
+      <div className="mb-6 flex gap-4 items-start">
+        {/* Product Image */}
+        {product.image && (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-24 h-24 rounded-lg shadow-lg object-cover shrink-0"
+          />
+        )}
+
+        {/* Title and Brand */}
+        <div className="flex-1">
+          {product.brand && (
+            <p className="text-sm text-gray-400 mb-1">{product.brand}</p>
+          )}
+          <h2 className="text-2xl font-bold">{product.name}</h2>
+        </div>
+      </div>
+
+      {/* Score - Health Rating */}
+      <div className={`mb-6 p-6 rounded-2xl border-2 ${getScoreBgColor(product.analysis.score)}`}>
+        <div className="mb-4">
+          <p className="text-sm text-white mb-2">Health Score</p>
+          <div className="flex items-baseline gap-1">
+            <p className={`text-6xl font-bold ${getScoreColor(product.analysis.score)}`}>
+              {product.analysis.score}
+            </p>
+            <p className="text-white text-sm">out of 5</p>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="w-full bg-zinc-900 rounded-full h-2 mb-4 overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${getScoreColor(product.analysis.score)}`}
+            style={{ width: `${(product.analysis.score / 5) * 100}%` }}
+          />
+        </div>
+
+        <div className={`text-sm font-semibold ${getScoreColor(product.analysis.score)}`}>
+          {product.analysis.score === 5 && "✓ Excellent choice"}
+          {product.analysis.score === 4 && "✓ Good choice"}
+          {product.analysis.score === 3 && "⚠ Proceed with caution"}
+          {product.analysis.score === 2 && "⚠ Not recommended"}
+          {product.analysis.score === 1 && "☠ Avoid"}
         </div>
       </div>
 
       {/* Verdict */}
-      <div className={`p-4 rounded-lg border ${getScoreBgColor(product.analysis.score)}`}>
-        <p className="text-sm text-gray-300">{product.analysis.verdict}</p>
+      <div className={`p-4 rounded-lg ${getScoreBgColor(product.analysis.score)}`}>
+        <p className="text-sm text-white leading-relaxed">{product.analysis.verdict}</p>
       </div>
 
       {/* Flags */}
@@ -65,14 +94,14 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
         <h3 className="text-sm font-semibold text-gray-400 mb-3">Nutrition per 100g</h3>
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: 'Calories', value: product.nutriments['energy-kcal_100g'], unit: 'kcal' },
-            { label: 'Fat', value: product.nutriments['fat_100g'], unit: 'g' },
-            { label: 'Sat. Fat', value: product.nutriments['saturated-fat_100g'], unit: 'g' },
-            { label: 'Carbs', value: product.nutriments['carbohydrates_100g'], unit: 'g' },
-            { label: 'Sugar', value: product.nutriments['sugars_100g'], unit: 'g' },
-            { label: 'Protein', value: product.nutriments['proteins_100g'], unit: 'g' },
-            { label: 'Salt', value: product.nutriments['salt_100g'], unit: 'g' },
-            { label: 'Fiber', value: product.nutriments['fiber_100g'], unit: 'g' },
+            { label: 'Calories', value: product.nutriments?.['energy-kcal_100g'], unit: 'kcal' },
+            { label: 'Fat', value: product.nutriments?.['fat_100g'], unit: 'g' },
+            { label: 'Sat. Fat', value: product.nutriments?.['saturated-fat_100g'], unit: 'g' },
+            { label: 'Carbs', value: product.nutriments?.['carbohydrates_100g'], unit: 'g' },
+            { label: 'Sugar', value: product.nutriments?.['sugars_100g'], unit: 'g' },
+            { label: 'Protein', value: product.nutriments?.['proteins_100g'], unit: 'g' },
+            { label: 'Salt', value: product.nutriments?.['salt_100g'], unit: 'g' },
+            { label: 'Fiber', value: product.nutriments?.['fiber_100g'], unit: 'g' },
           ].map((nutrient) => (
             <div
               key={nutrient.label}
