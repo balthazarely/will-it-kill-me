@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Html5QrcodeScanner, type Html5QrcodeScannerConfig } from 'html5-qrcode';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import { scanBarcode, type Product } from '@/lib/api';
 
 export default function FoodScanner() {
@@ -21,7 +21,7 @@ export default function FoodScanner() {
   useEffect(() => {
     if (!useCamera) return;
 
-    const config: Html5QrcodeScannerConfig = {
+    const config = {
       fps: 10,
       qrbox: { width: 250, height: 250 },
       aspectRatio: 1.0,
