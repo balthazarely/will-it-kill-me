@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Html5QrcodeScanner } from 'html5-qrcode';
 import { scanBarcode, type Product } from '@/lib/api';
 
 export default function FoodScanner() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [barcode, setBarcode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,56 +18,59 @@ export default function FoodScanner() {
   const [detectedBarcode, setDetectedBarcode] = useState('');
   const [confirmingBarcode, setConfirmingBarcode] = useState(false);
 
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
-
   useEffect(() => {
     if (!useCamera) return;
 
-    const config = {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0,
-      supportedFormats: [
-        'QR_CODE',
-        'UPC_A',
-        'UPC_E',
-        'CODE_128',
-        'CODE_39',
-        'EAN_13',
-        'EAN_8',
-        'ITF',
-        'CODABAR',
-      ],
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setCameraError('');
+
+        // Try to use native BarcodeDetector if available
+        if ('BarcodeDetector' in window) {
+          const barcodeDetector = new (window as any).BarcodeDetector({
+            formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e'],
+          });
+
+          detectionIntervalRef.current = setInterval(async () => {
+            if (videoRef.current && canvasRef.current && videoRef.current.readyState === 4) {
+              try {
+                const barcodes = await barcodeDetector.detect(videoRef.current);
+                if (barcodes && barcodes.length > 0) {
+                  setDetectedBarcode(barcodes[0].rawValue);
+                  setConfirmingBarcode(true);
+                  if (detectionIntervalRef.current) {
+                    clearInterval(detectionIntervalRef.current);
+                  }
+                }
+              } catch (e) {
+                // Detection errors are ignored
+              }
+            }
+          }, 500);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unable to access camera';
+        setCameraError(msg);
+        setUseCamera(false);
+      }
     };
 
-    const scanner = new Html5QrcodeScanner('html5-qrcode-full', config, false);
-    scannerRef.current = scanner;
-
-    const onScanSuccess = (decodedText: string) => {
-      setDetectedBarcode(decodedText);
-      setConfirmingBarcode(true);
-      scanner.pause();
-    };
-
-    const onScanError = () => {
-      // Silently ignore scan errors
-    };
-
-    try {
-      scanner.render(onScanSuccess, onScanError);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unable to access camera';
-      setCameraError(msg);
-      setUseCamera(false);
-    }
+    startCamera();
 
     return () => {
-      if (scannerRef.current) {
-        try {
-          scannerRef.current.clear();
-        } catch (e) {
-          // Scanner might already be cleared
-        }
+      if (detectionIntervalRef.current) {
+        clearInterval(detectionIntervalRef.current);
+      }
+      if (videoRef.current?.srcObject) {
+        (videoRef.current.srcObject as MediaStream)
+          .getTracks()
+          .forEach((track) => track.stop());
       }
     };
   }, [useCamera]);
@@ -116,29 +121,54 @@ export default function FoodScanner() {
       {/* Camera View */}
       {useCamera && !confirmingBarcode && (
         <div className="mb-8">
-          <div
-            id="html5-qrcode-full"
-            className="w-full rounded-lg bg-black mb-3 overflow-hidden"
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full rounded-lg bg-black mb-3"
             style={{ aspectRatio: '1' }}
           />
-          <p className="text-xs text-gray-400 text-center mb-3">Point camera at barcode</p>
-          <button
-            onClick={() => {
-              setUseCamera(false);
-              setCameraError('');
-              setConfirmingBarcode(false);
-            }}
-            className="w-full px-4 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
-          >
-            Cancel
-          </button>
+          <canvas ref={canvasRef} className="hidden" />
+          <p className="text-xs text-gray-400 text-center mb-3">Point camera at barcode or enter manually below</p>
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="Or type barcode number..."
+            value={detectedBarcode}
+            onChange={(e) => setDetectedBarcode(e.target.value)}
+            className="w-full px-4 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white mb-3"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (detectedBarcode) {
+                  setConfirmingBarcode(true);
+                }
+              }}
+              disabled={!detectedBarcode}
+              className="flex-1 px-4 py-2 bg-white text-black font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+            >
+              Use
+            </button>
+            <button
+              onClick={() => {
+                setUseCamera(false);
+                setCameraError('');
+                setConfirmingBarcode(false);
+                setDetectedBarcode('');
+              }}
+              className="flex-1 px-4 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
       {/* Barcode Confirmation */}
       {confirmingBarcode && (
         <div className="mb-8 p-4 bg-zinc-900 border border-zinc-700 rounded-lg">
-          <p className="text-sm text-gray-400 mb-3">Detected barcode:</p>
+          <p className="text-sm text-gray-400 mb-3">Scanned barcode:</p>
           <input
             type="text"
             value={detectedBarcode}
@@ -161,9 +191,7 @@ export default function FoodScanner() {
               onClick={() => {
                 setDetectedBarcode('');
                 setConfirmingBarcode(false);
-                if (scannerRef.current) {
-                  scannerRef.current.resume();
-                }
+                setUseCamera(true);
               }}
               className="flex-1 px-3 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
             >
