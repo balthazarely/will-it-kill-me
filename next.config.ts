@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
+// @ts-ignore
 import withPWA from "next-pwa";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+const nextConfig: NextConfig = {};
 
 export default withPWA({
   dest: "public",
