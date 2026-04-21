@@ -1,79 +1,18 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import { Scanner } from '@yudiel/react-qr-scanner';
 import { scanBarcode, type Product } from '@/lib/api';
 
 export default function FoodScanner() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
   const [barcode, setBarcode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [product, setProduct] = useState<Product | null>(null);
   const [expandedIngredients, setExpandedIngredients] = useState(false);
   const [useCamera, setUseCamera] = useState(false);
-  const [cameraError, setCameraError] = useState('');
   const [detectedBarcode, setDetectedBarcode] = useState('');
   const [confirmingBarcode, setConfirmingBarcode] = useState(false);
-
-  useEffect(() => {
-    if (!useCamera) return;
-
-    const startCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setCameraError('');
-
-        // Try to use native BarcodeDetector if available
-        if ('BarcodeDetector' in window) {
-          const barcodeDetector = new (window as any).BarcodeDetector({
-            formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e'],
-          });
-
-          detectionIntervalRef.current = setInterval(async () => {
-            if (videoRef.current && canvasRef.current && videoRef.current.readyState === 4) {
-              try {
-                const barcodes = await barcodeDetector.detect(videoRef.current);
-                if (barcodes && barcodes.length > 0) {
-                  setDetectedBarcode(barcodes[0].rawValue);
-                  setConfirmingBarcode(true);
-                  if (detectionIntervalRef.current) {
-                    clearInterval(detectionIntervalRef.current);
-                  }
-                }
-              } catch (e) {
-                // Detection errors are ignored
-              }
-            }
-          }, 500);
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unable to access camera';
-        setCameraError(msg);
-        setUseCamera(false);
-      }
-    };
-
-    startCamera();
-
-    return () => {
-      if (detectionIntervalRef.current) {
-        clearInterval(detectionIntervalRef.current);
-      }
-      if (videoRef.current?.srcObject) {
-        (videoRef.current.srcObject as MediaStream)
-          .getTracks()
-          .forEach((track) => track.stop());
-      }
-    };
-  }, [useCamera]);
 
   const handleScan = async () => {
     if (!barcode.trim()) {
@@ -111,24 +50,20 @@ export default function FoodScanner() {
 
   return (
     <div className="w-full">
-      {/* Camera Error */}
-      {cameraError && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <p className="text-red-400 text-xs">{cameraError}</p>
-        </div>
-      )}
-
       {/* Camera View */}
       {useCamera && !confirmingBarcode && (
         <div className="mb-8">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full rounded-lg bg-black mb-3"
-            style={{ aspectRatio: '1' }}
-          />
-          <canvas ref={canvasRef} className="hidden" />
+          <div className="w-full rounded-lg bg-black mb-3 overflow-hidden" style={{ aspectRatio: '1' }}>
+            <Scanner
+              onDecode={(result: any) => {
+                const barcode = typeof result === 'string' ? result : result?.rawValue;
+                if (barcode) {
+                  setDetectedBarcode(barcode);
+                  setConfirmingBarcode(true);
+                }
+              }}
+            />
+          </div>
           <p className="text-xs text-gray-400 text-center mb-3">Point camera at barcode or enter manually below</p>
           <input
             type="text"
@@ -153,7 +88,6 @@ export default function FoodScanner() {
             <button
               onClick={() => {
                 setUseCamera(false);
-                setCameraError('');
                 setConfirmingBarcode(false);
                 setDetectedBarcode('');
               }}
