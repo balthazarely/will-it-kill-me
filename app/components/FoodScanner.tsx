@@ -1,14 +1,89 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import jsQR from 'jsqr';
 import { scanBarcode, type Product } from '@/lib/api';
 
 export default function FoodScanner() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameRef = useRef<number | undefined>(undefined);
+
   const [barcode, setBarcode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [product, setProduct] = useState<Product | null>(null);
   const [expandedIngredients, setExpandedIngredients] = useState(false);
+  const [useCamera, setUseCamera] = useState(false);
+  const [cameraError, setCameraError] = useState('');
+
+  useEffect(() => {
+    if (!useCamera) return;
+
+    const startCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unable to access camera';
+        setCameraError(msg);
+        setUseCamera(false);
+      }
+    };
+
+    startCamera();
+
+    return () => {
+      if (videoRef.current?.srcObject) {
+        (videoRef.current.srcObject as MediaStream)
+          .getTracks()
+          .forEach((track) => track.stop());
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [useCamera]);
+
+  const scanFrame = () => {
+    if (!videoRef.current || !canvasRef.current) {
+      animationFrameRef.current = requestAnimationFrame(scanFrame);
+      return;
+    }
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      animationFrameRef.current = requestAnimationFrame(scanFrame);
+      return;
+    }
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+    if (code) {
+      setBarcode(code.data);
+      setUseCamera(false);
+    }
+
+    animationFrameRef.current = requestAnimationFrame(scanFrame);
+  };
+
+  useEffect(() => {
+    if (useCamera && videoRef.current?.readyState === 4) {
+      animationFrameRef.current = requestAnimationFrame(scanFrame);
+    }
+  }, [useCamera]);
 
   const handleScan = async () => {
     if (!barcode.trim()) {
@@ -46,28 +121,70 @@ export default function FoodScanner() {
 
   return (
     <div className="w-full">
+      {/* Camera Error */}
+      {cameraError && (
+        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <p className="text-red-400 text-xs">{cameraError}</p>
+        </div>
+      )}
+
+      {/* Camera View */}
+      {useCamera && (
+        <div className="mb-8">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className="w-full rounded-lg bg-black mb-3"
+            style={{ aspectRatio: '1' }}
+          />
+          <canvas ref={canvasRef} className="hidden" />
+          <button
+            onClick={() => {
+              setUseCamera(false);
+              setCameraError('');
+            }}
+            className="w-full px-4 py-2 bg-zinc-700 text-white font-medium rounded-lg hover:bg-zinc-600 transition-colors text-sm"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
       {/* Input Section */}
-      <div className="mb-8">
-        <input
-          type="text"
-          inputMode="numeric"
-          placeholder="Enter barcode number"
-          value={barcode}
-          onChange={(e) => setBarcode(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') handleScan();
-          }}
-          disabled={loading}
-          className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent mb-3"
-        />
-        <button
-          onClick={handleScan}
-          disabled={loading}
-          className="w-full px-4 py-3 bg-white text-black font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {loading ? 'Scanning...' : 'Scan'}
-        </button>
-      </div>
+      {!useCamera && (
+        <div className="mb-8">
+          <input
+            type="text"
+            inputMode="numeric"
+            placeholder="Enter barcode number"
+            value={barcode}
+            onChange={(e) => setBarcode(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') handleScan();
+            }}
+            disabled={loading}
+            className="w-full px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent mb-3"
+          />
+          <div className="flex gap-3">
+            <button
+              onClick={handleScan}
+              disabled={loading}
+              className="flex-1 px-4 py-3 bg-white text-black font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {loading ? 'Scanning...' : 'Scan'}
+            </button>
+            <button
+              onClick={() => setUseCamera(true)}
+              disabled={loading}
+              className="flex-1 px-4 py-3 bg-zinc-800 text-white font-medium rounded-lg border border-zinc-700 hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Use camera to scan barcode"
+            >
+              📷
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Error State */}
       {error && (
