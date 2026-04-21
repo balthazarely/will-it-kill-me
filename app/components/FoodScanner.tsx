@@ -55,11 +55,13 @@ export default function FoodScanner() {
         <div className="mb-8">
           <div className="w-full rounded-lg bg-black mb-3 overflow-hidden" style={{ aspectRatio: '1' }}>
             <Scanner
-              onDecode={(result: any) => {
-                const barcode = typeof result === 'string' ? result : result?.rawValue;
-                if (barcode) {
-                  setDetectedBarcode(barcode);
-                  setConfirmingBarcode(true);
+              onScan={(result: any) => {
+                if (result && result.length > 0) {
+                  const barcode = result[0]?.rawValue || result[0]?.getText?.() || result[0];
+                  if (barcode) {
+                    setDetectedBarcode(barcode);
+                    setConfirmingBarcode(true);
+                  }
                 }
               }}
             />
