@@ -127,7 +127,7 @@ export default function FoodScanner() {
             <img
               src="/will-it-kill-me-logo.png"
               alt="Scanr"
-              className="h-48 w-auto"
+              className="h-32 sm:h-48 w-auto max-w-xs sm:max-w-md"
             />
           </div>
           <div className="flex-1 overflow-hidden">

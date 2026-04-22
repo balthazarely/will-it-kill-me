@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { ScanItem } from "@/lib/useScanHistory";
 import { theme } from "@/lib/theme";
 import { useState } from "react";
@@ -43,6 +44,7 @@ export default function InitialScreen({
   onRecentScanClick,
 }: InitialScreenProps) {
   const [isHovering, setIsHovering] = useState(false);
+  const [isRecentScansOpen, setIsRecentScansOpen] = useState(false);
 
   return (
     <motion.div
@@ -114,23 +116,59 @@ export default function InitialScreen({
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Recent Scans */}
+      {/* Recent Scans Accordion */}
       {recentScans && recentScans.length > 0 && (
         <motion.div className="w-full max-w-sm" variants={itemVariants}>
-          <p className="text-xs text-white/40 font-medium mb-2">Recent Scans</p>
-          <div className="flex flex-wrap gap-2">
-            {recentScans.map((scan) => (
-              <button
-                key={scan.barcode}
-                onClick={() => onRecentScanClick?.(scan.barcode)}
-                className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white/90 hover:bg-white/20 hover:border-white/30 cursor-pointer transition-colors"
+          <motion.button
+            onClick={() => setIsRecentScansOpen(!isRecentScansOpen)}
+            className="w-full py-2 px-3 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium text-left hover:border-zinc-700 transition-colors flex justify-between items-center cursor-pointer"
+          >
+            <span>Recent Scans</span>
+            <motion.span
+              animate={{ rotate: isRecentScansOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-xs text-gray-500"
+            >
+              ▼
+            </motion.span>
+          </motion.button>
+
+          {/* Accordion Content */}
+          <AnimatePresence>
+            {isRecentScansOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="mt-2 p-3 bg-zinc-900/50 border border-zinc-700 rounded-lg"
               >
-                {scan.name}
-              </button>
-            ))}
-          </div>
+                <div className="flex flex-wrap gap-2">
+                  {recentScans.map((scan) => (
+                    <button
+                      key={scan.barcode}
+                      onClick={() => onRecentScanClick?.(scan.barcode)}
+                      className="px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white/90 hover:bg-white/20 hover:border-white/30 cursor-pointer transition-colors"
+                    >
+                      {scan.name}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
+
+      {/* Hall of Shame Link */}
+      <motion.div className="w-full max-w-sm pt-4" variants={itemVariants}>
+        <Link
+          href="/hall-of-shame"
+          className="w-full px-4 py-3 bg-white/5 border border-white/10 text-white font-medium rounded-xl hover:bg-white/10 hover:border-white/20 cursor-pointer transition-colors text-center block"
+        >
+          💀 Hall of Shame
+        </Link>
+      </motion.div>
     </motion.div>
   );
 }
