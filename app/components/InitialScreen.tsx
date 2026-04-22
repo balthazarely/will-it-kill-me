@@ -42,7 +42,7 @@ export default function InitialScreen({
 
   return (
     <motion.div
-      className="flex flex-col h-full bg-zinc-950 text-white items-center justify-start gap-6 px-8 pt-6 pb-8"
+      className="flex flex-col h-full bg-zinc-950 text-white items-center justify-start gap-4 px-8 pt-6 pb-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -107,20 +107,17 @@ export default function InitialScreen({
         </div>
       </motion.div>
 
-      {/* Spacer */}
-      <div className="flex-1" />
-
       {/* Links Section */}
-      <motion.div className="w-full max-w-sm space-y-3" variants={itemVariants}>
+      <motion.div className="w-full max-w-sm flex gap-3 mt-4" variants={itemVariants}>
         <Link
           href="/recent-scans"
-          className="w-full px-4 py-3 bg-white/5 border border-white/10 text-white font-medium rounded-xl hover:bg-white/10 hover:border-white/20 cursor-pointer transition-colors text-center block"
+          className="flex-1 px-3 py-2 bg-white/5 border border-white/10 text-white font-medium text-sm rounded-xl hover:bg-white/10 hover:border-white/20 cursor-pointer transition-colors text-center block"
         >
           📋 Recent Scans
         </Link>
         <Link
           href="/hall-of-shame"
-          className="w-full px-4 py-3 bg-white/5 border border-white/10 text-white font-medium rounded-xl hover:bg-white/10 hover:border-white/20 cursor-pointer transition-colors text-center block"
+          className="flex-1 px-3 py-2 bg-white/5 border border-white/10 text-white font-medium text-sm rounded-xl hover:bg-white/10 hover:border-white/20 cursor-pointer transition-colors text-center block"
         >
           💀 Hall of Shame
         </Link>
