@@ -141,7 +141,7 @@ export default function HallOfShamePage() {
     <PageTransition>
       <div className="w-full min-h-screen bg-zinc-950 text-white">
         {/* Header */}
-        <div className="sticky top-0 z-40 bg-gradient-to-b from-zinc-950 to-zinc-950/0 px-4 py-4 border-b border-primary-600/20">
+        <div className="sticky top-0 z-40 bg-zinc-950 px-4 py-4 border-b border-primary-600/20">
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-2 mb-3">
               <button

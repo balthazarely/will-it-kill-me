@@ -42,7 +42,7 @@ export default function InitialScreen({
 
   return (
     <motion.div
-      className="flex flex-col h-full bg-zinc-950 text-white items-center justify-start gap-4 px-8 pt-6 pb-4"
+      className="flex flex-col bg-zinc-950 text-white items-center justify-start gap-4 px-8 pt-6 pb-4"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
