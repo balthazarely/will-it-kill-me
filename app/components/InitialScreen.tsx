@@ -1,5 +1,7 @@
-import { motion } from 'framer-motion';
-import { ScanItem } from '@/lib/useScanHistory';
+import { motion } from "framer-motion";
+import { ScanItem } from "@/lib/useScanHistory";
+import { theme } from "@/lib/theme";
+import { useState } from "react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -40,6 +42,8 @@ export default function InitialScreen({
   recentScans,
   onRecentScanClick,
 }: InitialScreenProps) {
+  const [isHovering, setIsHovering] = useState(false);
+
   return (
     <motion.div
       className="flex flex-col h-full bg-zinc-950 text-white items-center justify-start gap-6 px-8 pt-6 pb-8"
@@ -48,17 +52,29 @@ export default function InitialScreen({
       animate="visible"
     >
       {/* Subtitle */}
-      <motion.p className="text-lg text-white/70 text-center" variants={itemVariants}>
-        Scan barcodes to check product ingredients and health impact
+      <motion.p
+        className="text-lg max-w-sm  text-white/70 text-center"
+        variants={itemVariants}
+      >
+        Scan barcodes to find out if your food is trying to kill you.
       </motion.p>
 
       {/* Camera Button + Input Section */}
-      <motion.div className="w-full max-w-sm flex flex-col gap-8" variants={itemVariants}>
+      <motion.div
+        className="w-full max-w-sm flex flex-col gap-8"
+        variants={itemVariants}
+      >
         {/* Camera Button - Large & Primary */}
         <button
           onClick={onCameraClick}
           disabled={loading}
-          className="w-full px-8 py-6 bg-gradient-to-r from-violet-600 to-violet-500 text-white font-semibold rounded-2xl hover:from-violet-700 hover:to-violet-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all text-lg shadow-lg hover:shadow-violet-500/30"
+          className="w-full px-8 py-6 text-white font-semibold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-lg shadow-lg"
+          style={{
+            ...(isHovering ? theme.styles.primaryGradientHover : theme.styles.primaryGradient),
+            transition: "background 0.15s ease",
+          }}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
           title="Use camera to scan barcode"
         >
           📷 Scan with Camera
@@ -83,7 +99,7 @@ export default function InitialScreen({
               if (e.key === "Enter") onScan();
             }}
             disabled={loading}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent"
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
           />
           <button
             onClick={onScan}

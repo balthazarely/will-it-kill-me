@@ -157,7 +157,7 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
       <motion.div className="pt-2" variants={itemVariants}>
         <button
           onClick={() => setExpandedIngredients(!expandedIngredients)}
-          className="w-full py-2 px-3 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium text-left hover:border-zinc-700 transition-colors flex justify-between items-center"
+          className="w-full py-2 px-3 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium text-left hover:border-zinc-700 transition-colors flex justify-between items-center cursor-pointer"
         >
           Ingredients
           <span className="text-xs text-gray-500">{expandedIngredients ? '▼' : '▶'}</span>
@@ -172,7 +172,7 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
       {/* Scan Again Button */}
       <motion.button
         onClick={onReset}
-        className="w-full mt-6 px-4 py-3 bg-zinc-900 text-white border border-zinc-700 font-medium rounded-lg hover:border-zinc-600 transition-colors"
+        className="w-full mt-6 px-4 py-3 bg-zinc-900 text-white border border-zinc-700 font-medium rounded-lg hover:border-zinc-600 transition-colors cursor-pointer"
         variants={itemVariants}
       >
         Scan Another Product

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useScanBarcode } from "@/lib/hooks";
 import { useScanHistory } from "@/lib/useScanHistory";
@@ -12,6 +12,7 @@ import ErrorScreen from "./ErrorScreen";
 
 export default function FoodScanner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [barcodeInput, setBarcodeInput] = useState("");
   const [barcodeToScan, setBarcodeToScan] = useState<string | null>(null);
   const [useCamera, setUseCamera] = useState(false);
@@ -23,6 +24,12 @@ export default function FoodScanner() {
 
   const queryClient = useQueryClient();
   const { history, addScan } = useScanHistory();
+
+  useEffect(() => {
+    if (searchParams.get("camera") === "true") {
+      setUseCamera(true);
+    }
+  }, [searchParams]);
   const {
     data: product,
     isPending: loading,
@@ -101,7 +108,10 @@ export default function FoodScanner() {
       {!loading && useCamera && (
         <CameraScanner
           onBarcodeScan={handleBarcodeScan}
-          onCancel={() => setUseCamera(false)}
+          onCancel={() => {
+            setUseCamera(false);
+            router.push("/");
+          }}
         />
       )}
 
@@ -114,7 +124,11 @@ export default function FoodScanner() {
       {!loading && !useCamera && !product && !error && !isNavigating && (
         <div className="w-full h-screen bg-zinc-950 flex flex-col overflow-hidden">
           <div className="flex justify-center pt-2 flex-shrink-0">
-            <img src="/logo.png" alt="Scanr" className="h-48 w-auto" />
+            <img
+              src="/will-it-kill-me-logo.png"
+              alt="Scanr"
+              className="h-48 w-auto"
+            />
           </div>
           <div className="flex-1 overflow-hidden">
             <InitialScreen

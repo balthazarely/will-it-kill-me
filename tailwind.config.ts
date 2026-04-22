@@ -1,13 +1,18 @@
-// tailwind.config.js
-// Add these custom animations to your existing Tailwind config.
-
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: ["./app/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       fontFamily: {
         sans: ["'Space Grotesk'", "sans-serif"],
+      },
+      colors: {
+        primary: {
+          400: "#a78bfa",
+          500: "#a78bfa",
+          600: "#7c3aed",
+          700: "#6d28d9",
+        },
       },
       keyframes: {
         scanLine: {
@@ -30,5 +35,4 @@ export default {
       },
     },
   },
-  plugins: [],
 };

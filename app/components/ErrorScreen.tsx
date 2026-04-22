@@ -31,7 +31,7 @@ export default function ErrorScreen({ barcode, onBack }: ErrorScreenProps) {
       <div className="w-full max-w-sm flex flex-col gap-3 pt-4">
         <button
           onClick={onBack}
-          className="w-full px-6 py-3 bg-zinc-800 text-white font-medium rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700"
+          className="w-full px-6 py-3 bg-zinc-800 text-white font-medium rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700 cursor-pointer"
         >
           Back to Home
         </button>
