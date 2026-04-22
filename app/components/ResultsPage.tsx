@@ -160,7 +160,13 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
           className="w-full py-2 px-3 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium text-left hover:border-zinc-700 transition-colors flex justify-between items-center cursor-pointer"
         >
           Ingredients
-          <span className="text-xs text-gray-500">{expandedIngredients ? '▼' : '▶'}</span>
+          <motion.span
+            animate={{ rotate: expandedIngredients ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-xs text-gray-500"
+          >
+            ▼
+          </motion.span>
         </button>
         {expandedIngredients && (
           <div className="mt-3 p-3 bg-zinc-900 rounded-lg border border-zinc-800">
