@@ -55,6 +55,35 @@ export default function ProductPage() {
               transition={{
                 duration: 2.5,
                 repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+
+            {/* Scan line — uses custom animation defined in tailwind.config.js */}
+            <div
+              className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary-400 to-transparent animate-scan-line"
+              style={{
+                boxShadow: `0_0_12px_${theme.hex.primary600}`,
+              }}
+            />
+
+            {/* Scanning lines */}
+            <motion.div
+              className="absolute left-0 right-0 h-[3px] pointer-events-none"
+              style={{
+                backgroundColor: theme.hex.primary400,
+                boxShadow: `0_0_8px_${theme.hex.primary400}`,
+                zIndex: 10,
+                opacity: 0.6,
+              }}
+              animate={{
+                top: ["10%", "90%"],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
               }}
             />
 
