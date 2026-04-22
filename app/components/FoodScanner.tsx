@@ -135,11 +135,6 @@ export default function FoodScanner({ initialOpenCamera = false }: FoodScannerPr
               onScan={handleScan}
               onCameraClick={() => setUseCamera(true)}
               loading={loading}
-              recentScans={history}
-              onRecentScanClick={(barcode) => {
-                setIsNavigating(true);
-                router.push(`/product/${barcode}`);
-              }}
             />
           </div>
         </div>
