@@ -120,7 +120,7 @@ export default function FoodScanner({ initialOpenCamera = false }: FoodScannerPr
 
       {/* Initial Input Screen with Header */}
       {!loading && !useCamera && !product && !error && !isNavigating && (
-        <div className="w-full h-screen bg-zinc-950 flex flex-col overflow-hidden">
+        <div className="w-full min-h-screen bg-zinc-950 flex flex-col">
           <div className="flex justify-center pt-2 flex-shrink-0">
             <img
               src="/will-it-kill-me-logo.png"
@@ -128,15 +128,13 @@ export default function FoodScanner({ initialOpenCamera = false }: FoodScannerPr
               className="h-32 sm:h-48 w-auto max-w-xs sm:max-w-md"
             />
           </div>
-          <div className="flex-1 overflow-hidden">
-            <InitialScreen
-              barcode={barcodeInput}
-              onBarcodeChange={setBarcodeInput}
-              onScan={handleScan}
-              onCameraClick={() => setUseCamera(true)}
-              loading={loading}
-            />
-          </div>
+          <InitialScreen
+            barcode={barcodeInput}
+            onBarcodeChange={setBarcodeInput}
+            onScan={handleScan}
+            onCameraClick={() => setUseCamera(true)}
+            loading={loading}
+          />
         </div>
       )}
     </div>
