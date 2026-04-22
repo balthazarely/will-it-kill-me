@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useScanBarcode } from "@/lib/hooks";
 import { useScanHistory } from "@/lib/useScanHistory";
@@ -10,12 +10,15 @@ import CameraScanner from "./CameraScanner";
 import ScanningScreen from "./ScanningScreen";
 import ErrorScreen from "./ErrorScreen";
 
-export default function FoodScanner() {
+interface FoodScannerProps {
+  initialOpenCamera?: boolean;
+}
+
+export default function FoodScanner({ initialOpenCamera = false }: FoodScannerProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [barcodeInput, setBarcodeInput] = useState("");
   const [barcodeToScan, setBarcodeToScan] = useState<string | null>(null);
-  const [useCamera, setUseCamera] = useState(false);
+  const [useCamera, setUseCamera] = useState(initialOpenCamera);
   const [error, setError] = useState("");
   const [lastScannedBarcode, setLastScannedBarcode] = useState<string | null>(
     null,
@@ -25,11 +28,6 @@ export default function FoodScanner() {
   const queryClient = useQueryClient();
   const { history, addScan } = useScanHistory();
 
-  useEffect(() => {
-    if (searchParams.get("camera") === "true") {
-      setUseCamera(true);
-    }
-  }, [searchParams]);
   const {
     data: product,
     isPending: loading,
