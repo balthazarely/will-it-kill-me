@@ -26,7 +26,7 @@ export default function CameraScanner({
     <div className="flex flex-col min-h-screen w-full bg-zinc-950 text-white items-center justify-center gap-6 px-8">
       {/* Camera View - optimized for mobile */}
       <div className="relative w-[85vw] h-[85vw] max-w-md rounded-2xl overflow-hidden bg-black">
-        <Scanner onScan={handleScan} />
+        <Scanner sound={false} onScan={handleScan} />
       </div>
 
       {/* Instruction Text */}
