@@ -1,11 +1,25 @@
+import { Suspense } from 'react';
 import FoodScanner from './components/FoodScanner';
 import PageTransition from './components/PageTransition';
+
+function ScannerLoader() {
+  return (
+    <div className="w-full h-screen bg-black text-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-6xl mb-4">🔍</div>
+        <p className="text-white/60">Loading scanner...</p>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
     <PageTransition>
       <div className="min-h-screen bg-black text-white">
-        <FoodScanner />
+        <Suspense fallback={<ScannerLoader />}>
+          <FoodScanner />
+        </Suspense>
       </div>
     </PageTransition>
   );
