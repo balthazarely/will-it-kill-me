@@ -2,20 +2,23 @@
 
 import { useState, useEffect } from "react";
 import ScannerLoader from "./ScannerLoader";
-
+import { useScanProgress } from "@/lib/hooks/useScanProgress";
 
 interface ScanningScreenProps {
   productName: string;
+  barcode?: string;
   emoji?: string;
   onCancel?: () => void;
 }
 
 export default function ScanningScreen({
   productName,
+  barcode,
   emoji = "🍔",
   onCancel,
 }: ScanningScreenProps) {
   const [dots, setDots] = useState("");
+  const { progress } = useScanProgress(barcode || null);
 
   useEffect(() => {
     const id = setInterval(
@@ -32,10 +35,10 @@ export default function ScanningScreen({
       {/* Status text */}
       <div className="text-center mt-1">
         <p className="text-[15px] font-semibold tracking-tight mb-0.5">
-          Analyzing {productName}
+          {progress?.message || "Analyzing " + productName}
         </p>
         <p className="text-[14px] text-white/40 font-medium">
-          Consulting a scientist<span className="inline-block w-[12px] text-left">{dots}</span>
+          {!progress?.message && `Consulting a scientist${dots}`}
         </p>
       </div>
 

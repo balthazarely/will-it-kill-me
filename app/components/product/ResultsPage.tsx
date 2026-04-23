@@ -4,6 +4,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { type Product } from "@/lib/types";
 import { getScoreColor, getScoreBgColor } from "@/lib/scoreUtils";
+import {
+  getEcoScoreBgColor,
+  getEcoScoreColor,
+  getEcoScoreLabel,
+  getEcoScoreBadgeEmoji,
+} from "@/lib/ecoScoreUtils";
 import { containerVariants, itemVariants } from "@/lib/animationVariants";
 
 interface ResultsPageProps {
@@ -44,7 +50,7 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
         </div>
       </motion.div>
 
-      {/* Score - Health Rating */}
+      {/* Health Score */}
       <motion.div
         className={`mb-6 p-6 rounded-2xl border-2 ${getScoreBgColor(product.analysis.score)}`}
         variants={itemVariants}
@@ -110,6 +116,35 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
           </div>
         </motion.div>
       )}
+
+      {/* Environmental Impact */}
+      <motion.div
+        className={`p-4 rounded-2xl border-2 ${getEcoScoreBgColor(product.ecoscore)}`}
+        variants={itemVariants}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm text-white">Environmental Impact</p>
+          {product.ecoscore && product.ecoscore !== "unknown" ? (
+            <p
+              className={`text-2xl font-bold ${getEcoScoreColor(product.ecoscore)}`}
+            >
+              {product.ecoscore.toUpperCase()}
+            </p>
+          ) : (
+            <p className="text-lg">❓</p>
+          )}
+        </div>
+
+        <div
+          className={`text-sm font-semibold ${
+            product.ecoscore && product.ecoscore !== "unknown"
+              ? getEcoScoreColor(product.ecoscore)
+              : "text-gray-400"
+          }`}
+        >
+          {getEcoScoreLabel(product.ecoscore)}
+        </div>
+      </motion.div>
 
       {/* Suggestion */}
       {product.analysis.suggestion && (

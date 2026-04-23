@@ -5,6 +5,7 @@ import {
   PutItemCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
+import { progressManager } from "@/lib/progressManager";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const db = new DynamoDBClient({
@@ -21,11 +22,14 @@ export async function GET(
 ) {
   const { barcode } = await params;
   const startTime = Date.now();
-  // console.log(`[${new Date().toISOString()}] 🔍 REQUEST START - Barcode: ${barcode}`);
+
+  progressManager.emit(barcode, {
+    status: "checking_cache",
+    message: "Checking our database...",
+  });
 
   // Check cache first
   try {
-    // console.log(`[${new Date().toISOString()}] 📦 Checking cache for barcode: ${barcode}`);
     const cached = await db.send(
       new GetItemCommand({
         TableName: "food-scanner-cache",
@@ -48,8 +52,11 @@ export async function GET(
       );
 
       if (cached.Item?.data?.S) {
-        const elapsed = Date.now() - startTime;
-        // console.log(`[${new Date().toISOString()}] ✨ RETURNING CACHED RESULT (${elapsed}ms)`);
+        progressManager.emit(barcode, {
+          status: "complete",
+          message: "Found in database!",
+        });
+        progressManager.clear(barcode);
         return Response.json(JSON.parse(cached.Item.data.S));
       }
     }
@@ -58,8 +65,11 @@ export async function GET(
     console.log(`[${new Date().toISOString()}] ⚠️ Cache read error:`, err);
   }
 
-  // Cache miss — hit OFF
-  // console.log(`[${new Date().toISOString()}] 🌍 Fetching from OpenFoodFacts...`);
+  progressManager.emit(barcode, {
+    status: "fetching_product",
+    message: "Looking up product details...",
+  });
+
   let offData;
   try {
     const offRes = await fetch(
@@ -91,8 +101,11 @@ export async function GET(
   const additives = product.additives_tags ?? [];
   // console.log(`[${new Date().toISOString()}] ✅ Product fetched: ${product.product_name}`);
 
-  // Hit Anthropic
-  // console.log(`[${new Date().toISOString()}] 🤖 Calling Anthropic Claude for analysis...`);
+  progressManager.emit(barcode, {
+    status: "analyzing",
+    message: "Analyzing with AI...",
+  });
+
   let analysis;
   try {
     const message = await anthropic.messages.create({
@@ -147,8 +160,14 @@ export async function GET(
     ingredients,
     nova_group: novaGroup,
     additives,
+    ecoscore: product.ecoscore_grade ?? null,
     nutriments: product.nutriments,
     analysis,
+  });
+
+  progressManager.emit(barcode, {
+    status: "caching",
+    message: "Saving results...",
   });
 
   // Write to cache
@@ -180,6 +199,7 @@ export async function GET(
           sat_fat_per_100g: {
             N: String(product.nutriments?.["saturated-fat_100g"] ?? 0),
           },
+          ecoscore: { S: product.ecoscore_grade ?? "unknown" },
           ttl: { N: String(Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30) },
         },
       }),
@@ -200,6 +220,12 @@ export async function GET(
       console.log("Cache write failed:", err.message);
     }
   }
+
+  progressManager.emit(barcode, {
+    status: "complete",
+    message: "Done!",
+  });
+  progressManager.clear(barcode);
 
   return Response.json(JSON.parse(responseBody));
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import InitialScreen from "./InitialScreen";
 import CameraScanner from "./CameraScanner";
@@ -15,17 +15,21 @@ export default function MainPage({
   const router = useRouter();
   const [barcodeInput, setBarcodeInput] = useState("");
   const [useCamera, setUseCamera] = useState(initialOpenCamera);
+  const [isPending, startTransition] = useTransition();
 
   const handleScan = () => {
     if (!barcodeInput.trim()) {
       return;
     }
-    router.push(`/search?barcode=${encodeURIComponent(barcodeInput)}`);
+    startTransition(() => {
+      router.push(`/search?barcode=${encodeURIComponent(barcodeInput)}`);
+    });
   };
 
   const handleBarcodeScan = (scannedCode: string) => {
-    setUseCamera(false);
-    router.push(`/search?barcode=${encodeURIComponent(scannedCode)}`);
+    startTransition(() => {
+      router.push(`/search?barcode=${encodeURIComponent(scannedCode)}`);
+    });
   };
 
   return (

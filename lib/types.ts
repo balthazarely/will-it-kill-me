@@ -5,6 +5,7 @@ export interface Product {
   ingredients: string;
   nova_group: number;
   additives: string[];
+  ecoscore?: string | null;
   nutriments: {
     [key: string]: number | undefined;
     "energy-kcal_100g"?: number;

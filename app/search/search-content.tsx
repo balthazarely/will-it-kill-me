@@ -19,7 +19,13 @@ export default function SearchContent() {
   }
 
   if (loading) {
-    return <ScanningScreen productName={barcode} onCancel={cancelSearch} />;
+    return (
+      <ScanningScreen
+        productName={barcode}
+        barcode={barcode}
+        onCancel={cancelSearch}
+      />
+    );
   }
 
   if (error || !product) {
