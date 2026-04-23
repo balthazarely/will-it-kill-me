@@ -15,7 +15,7 @@ export default function SearchContent() {
     return (
       <ScanningScreen
         productName={barcode || "Scanning..."}
-        barcode={barcode}
+        barcode={barcode || undefined}
         onCancel={barcode ? cancelSearch : undefined}
       />
     );
