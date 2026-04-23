@@ -10,24 +10,18 @@ export default function SearchContent() {
   const router = useRouter();
   const { barcode, product, loading, error, cancelSearch } = useProductSearch();
 
-  if (!barcode) {
-    return (
-      <PageTransition>
-        <ErrorScreen barcode="unknown" onBack={() => router.push("/")} />
-      </PageTransition>
-    );
-  }
-
-  if (loading) {
+  // Show loading screen while initializing or fetching
+  if (!barcode || loading) {
     return (
       <ScanningScreen
-        productName={barcode}
+        productName={barcode || "Scanning..."}
         barcode={barcode}
-        onCancel={cancelSearch}
+        onCancel={barcode ? cancelSearch : undefined}
       />
     );
   }
 
+  // Show error only when we have a barcode and there's an actual error
   if (error || !product) {
     return (
       <PageTransition>

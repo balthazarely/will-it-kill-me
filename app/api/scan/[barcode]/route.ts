@@ -165,11 +165,6 @@ export async function GET(
     analysis,
   });
 
-  progressManager.emit(barcode, {
-    status: "caching",
-    message: "Saving results...",
-  });
-
   // Write to cache
   try {
     await db.send(
@@ -221,10 +216,6 @@ export async function GET(
     }
   }
 
-  progressManager.emit(barcode, {
-    status: "complete",
-    message: "Done!",
-  });
   progressManager.clear(barcode);
 
   return Response.json(JSON.parse(responseBody));
