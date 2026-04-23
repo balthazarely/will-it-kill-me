@@ -33,14 +33,13 @@ export default function ScanningScreen({
       <ScannerLoader emoji={emoji} />
 
       {/* Status text */}
-      <div className="text-center mt-1">
-        <p className="text-[15px] font-semibold tracking-tight mb-0.5">
-          {progress?.message || "Analyzing " + productName}
-        </p>
-        <p className="text-[14px] text-white/40 font-medium">
-          {!progress?.message && `Consulting a scientist${dots}`}
-        </p>
-      </div>
+      {progress?.message && (
+        <div className="text-center mt-1">
+          <p className="text-[15px] font-semibold tracking-tight">
+            {progress.message}
+          </p>
+        </div>
+      )}
 
       {/* Cancel Button */}
       {onCancel && (
