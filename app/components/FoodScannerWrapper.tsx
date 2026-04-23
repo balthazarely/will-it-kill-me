@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import FoodScanner from "./FoodScanner";
+import MainPage from "./home/MainPage";
 
 export default function FoodScannerWrapper() {
   const searchParams = useSearchParams();
@@ -14,5 +14,5 @@ export default function FoodScannerWrapper() {
     }
   }, [searchParams]);
 
-  return <FoodScanner initialOpenCamera={shouldOpenCamera} />;
+  return <MainPage initialOpenCamera={shouldOpenCamera} />;
 }

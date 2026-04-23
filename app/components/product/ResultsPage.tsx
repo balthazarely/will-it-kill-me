@@ -1,34 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { type Product } from '@/lib/api';
-import { getScoreColor, getScoreBgColor } from '@/lib/scoreUtils';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { type Product } from "@/lib/types";
+import { getScoreColor, getScoreBgColor } from "@/lib/scoreUtils";
+import { containerVariants, itemVariants } from "@/lib/animationVariants";
 
 interface ResultsPageProps {
   product: Product;
   onReset: () => void;
 }
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.2 },
-  },
-};
 
 export default function ResultsPage({ product, onReset }: ResultsPageProps) {
   const [expandedIngredients, setExpandedIngredients] = useState(false);
@@ -41,7 +22,10 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
       animate="visible"
     >
       {/* Product Header with Image */}
-      <motion.div className="mb-6 flex gap-4 items-start" variants={itemVariants}>
+      <motion.div
+        className="mb-6 flex gap-4 items-start"
+        variants={itemVariants}
+      >
         {/* Product Image */}
         {product.image && (
           <img
@@ -61,11 +45,16 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
       </motion.div>
 
       {/* Score - Health Rating */}
-      <motion.div className={`mb-6 p-6 rounded-2xl border-2 ${getScoreBgColor(product.analysis.score)}`} variants={itemVariants}>
+      <motion.div
+        className={`mb-6 p-6 rounded-2xl border-2 ${getScoreBgColor(product.analysis.score)}`}
+        variants={itemVariants}
+      >
         <div className="mb-4">
           <p className="text-sm text-white mb-2">Health Score</p>
           <div className="flex items-baseline gap-1">
-            <p className={`text-6xl font-bold ${getScoreColor(product.analysis.score)}`}>
+            <p
+              className={`text-6xl font-bold ${getScoreColor(product.analysis.score)}`}
+            >
               {product.analysis.score}
             </p>
             <p className="text-white text-sm">out of 5</p>
@@ -80,7 +69,9 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
           />
         </div>
 
-        <div className={`text-sm font-semibold ${getScoreColor(product.analysis.score)}`}>
+        <div
+          className={`text-sm font-semibold ${getScoreColor(product.analysis.score)}`}
+        >
           {product.analysis.score === 5 && "✓ Excellent choice"}
           {product.analysis.score === 4 && "✓ Good choice"}
           {product.analysis.score === 3 && "⚠ Proceed with caution"}
@@ -90,8 +81,13 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
       </motion.div>
 
       {/* Verdict */}
-      <motion.div className={`p-4 rounded-lg ${getScoreBgColor(product.analysis.score)}`} variants={itemVariants}>
-        <p className="text-sm text-white leading-relaxed">{product.analysis.verdict}</p>
+      <motion.div
+        className={`p-4 rounded-lg ${getScoreBgColor(product.analysis.score)}`}
+        variants={itemVariants}
+      >
+        <p className="text-sm text-white leading-relaxed">
+          {product.analysis.verdict}
+        </p>
       </motion.div>
 
       {/* Flags */}
@@ -117,7 +113,10 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
 
       {/* Suggestion */}
       {product.analysis.suggestion && (
-        <motion.div className="flex gap-3 p-4 bg-zinc-900/50 border border-zinc-700 rounded-lg" variants={itemVariants}>
+        <motion.div
+          className="flex gap-3 p-4 bg-zinc-900/50 border border-zinc-700 rounded-lg"
+          variants={itemVariants}
+        >
           <span className="text-lg flex-shrink-0">💡</span>
           <p className="text-sm text-gray-300">{product.analysis.suggestion}</p>
         </motion.div>
@@ -125,17 +124,51 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
 
       {/* Nutrition Grid */}
       <motion.div className="pt-2" variants={itemVariants}>
-        <h3 className="text-sm font-semibold text-gray-400 mb-3">Nutrition per 100g</h3>
+        <h3 className="text-sm font-semibold text-gray-400 mb-3">
+          Nutrition per 100g
+        </h3>
         <div className="grid grid-cols-4 gap-3">
           {[
-            { label: 'Calories', value: product.nutriments?.['energy-kcal_100g'], unit: 'kcal' },
-            { label: 'Fat', value: product.nutriments?.['fat_100g'], unit: 'g' },
-            { label: 'Sat. Fat', value: product.nutriments?.['saturated-fat_100g'], unit: 'g' },
-            { label: 'Carbs', value: product.nutriments?.['carbohydrates_100g'], unit: 'g' },
-            { label: 'Sugar', value: product.nutriments?.['sugars_100g'], unit: 'g' },
-            { label: 'Protein', value: product.nutriments?.['proteins_100g'], unit: 'g' },
-            { label: 'Salt', value: product.nutriments?.['salt_100g'], unit: 'g' },
-            { label: 'Fiber', value: product.nutriments?.['fiber_100g'], unit: 'g' },
+            {
+              label: "Calories",
+              value: product.nutriments?.["energy-kcal_100g"],
+              unit: "kcal",
+            },
+            {
+              label: "Fat",
+              value: product.nutriments?.["fat_100g"],
+              unit: "g",
+            },
+            {
+              label: "Sat. Fat",
+              value: product.nutriments?.["saturated-fat_100g"],
+              unit: "g",
+            },
+            {
+              label: "Carbs",
+              value: product.nutriments?.["carbohydrates_100g"],
+              unit: "g",
+            },
+            {
+              label: "Sugar",
+              value: product.nutriments?.["sugars_100g"],
+              unit: "g",
+            },
+            {
+              label: "Protein",
+              value: product.nutriments?.["proteins_100g"],
+              unit: "g",
+            },
+            {
+              label: "Salt",
+              value: product.nutriments?.["salt_100g"],
+              unit: "g",
+            },
+            {
+              label: "Fiber",
+              value: product.nutriments?.["fiber_100g"],
+              unit: "g",
+            },
           ].map((nutrient) => (
             <div
               key={nutrient.label}
@@ -145,7 +178,7 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
               <p className="text-lg font-semibold">
                 {nutrient.value !== null && nutrient.value !== undefined
                   ? nutrient.value.toFixed(1)
-                  : '—'}
+                  : "—"}
               </p>
               <p className="text-xs text-gray-600">{nutrient.unit}</p>
             </div>
@@ -170,7 +203,9 @@ export default function ResultsPage({ product, onReset }: ResultsPageProps) {
         </button>
         {expandedIngredients && (
           <div className="mt-3 p-3 bg-zinc-900 rounded-lg border border-zinc-800">
-            <p className="text-sm text-gray-300 leading-relaxed">{product.ingredients}</p>
+            <p className="text-sm text-gray-300 leading-relaxed">
+              {product.ingredients}
+            </p>
           </div>
         )}
       </motion.div>

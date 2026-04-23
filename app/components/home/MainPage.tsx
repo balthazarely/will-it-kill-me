@@ -9,7 +9,9 @@ interface FoodScannerProps {
   initialOpenCamera?: boolean;
 }
 
-export default function FoodScanner({ initialOpenCamera = false }: FoodScannerProps) {
+export default function MainPage({
+  initialOpenCamera = false,
+}: FoodScannerProps) {
   const router = useRouter();
   const [barcodeInput, setBarcodeInput] = useState("");
   const [useCamera, setUseCamera] = useState(initialOpenCamera);
@@ -42,10 +44,10 @@ export default function FoodScanner({ initialOpenCamera = false }: FoodScannerPr
       {/* Initial Input Screen with Header */}
       {!useCamera && (
         <div className="w-full min-h-screen bg-zinc-950 flex flex-col">
-          <div className="flex justify-center pt-2 flex-shrink-0">
+          <div className="flex justify-center pt-2 shrink-0">
             <img
               src="/will-it-kill-me-logo.png"
-              alt="Scanr"
+              alt="will-it-kill-me"
               className="h-32 sm:h-48 w-auto max-w-xs sm:max-w-md"
             />
           </div>
@@ -54,7 +56,6 @@ export default function FoodScanner({ initialOpenCamera = false }: FoodScannerPr
             onBarcodeChange={setBarcodeInput}
             onScan={handleScan}
             onCameraClick={() => setUseCamera(true)}
-            loading={false}
           />
         </div>
       )}

@@ -1,6 +1,6 @@
-import { Suspense } from 'react';
-import FoodScanner from './components/FoodScanner';
-import PageTransition from './components/PageTransition';
+import { Suspense } from "react";
+import FoodScannerWrapper from "./components/FoodScannerWrapper";
+import PageTransition from "./components/shared/PageTransition";
 
 function ScannerLoader() {
   return (
@@ -18,7 +18,7 @@ export default function Home() {
     <PageTransition>
       <div className="min-h-screen bg-black text-white">
         <Suspense fallback={<ScannerLoader />}>
-          <FoodScanner />
+          <FoodScannerWrapper />
         </Suspense>
       </div>
     </PageTransition>

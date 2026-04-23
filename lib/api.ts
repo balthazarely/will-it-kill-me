@@ -1,36 +1,41 @@
-const API_URL = "https://i9bha5wbmb.execute-api.us-east-2.amazonaws.com";
+import { Product } from "./types";
 
-export interface Product {
-  name: string;
-  brand?: string;
-  image?: string;
-  ingredients: string;
-  nova_group: number;
-  additives: string[];
-  nutriments: {
-    [key: string]: number | undefined;
-    "energy-kcal_100g"?: number;
-    fat_100g?: number;
-    "saturated-fat_100g"?: number;
-    carbohydrates_100g?: number;
-    sugars_100g?: number;
-    proteins_100g?: number;
-    salt_100g?: number;
-    fiber_100g?: number;
-  };
-  analysis: {
-    score: number;
-    verdict: string;
-    flags: string[];
-    suggestion: string;
-  };
+// const API_URL = "https://i9bha5wbmb.execute-api.us-east-2.amazonaws.com";
+
+export class ScanError extends Error {
+  constructor(
+    message: string,
+    readonly type: "not_found" | "server" | "network" | "abort",
+  ) {
+    super(message);
+    this.name = "ScanError";
+  }
 }
 
-export const scanBarcode = async (barcode: string): Promise<Product> => {
-  const response = await fetch(`${API_URL}/scan/${barcode}`);
-  if (!response.ok) {
-    throw new Error("Product not found");
+export const scanBarcode = async (
+  barcode: string,
+  signal?: AbortSignal,
+): Promise<Product> => {
+  try {
+    const response = await fetch(`/api/scan/${barcode}`, { signal });
+    if (response.status === 404) {
+      throw new ScanError("Product not found", "not_found");
+    }
+    if (!response.ok) {
+      throw new ScanError("Server error", "server");
+    }
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    if (err instanceof ScanError) {
+      throw err;
+    }
+    if (err instanceof TypeError) {
+      throw new ScanError("Network error", "network");
+    }
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ScanError("Request cancelled", "abort");
+    }
+    throw err;
   }
-  const data = await response.json();
-  return data;
 };

@@ -6,32 +6,13 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { theme } from "@/lib/theme";
 import { getScoreColor, getScoreBgColor } from "@/lib/scoreUtils";
-import { useHallOfShame } from "@/lib/useHallOfShame";
-import ScanCorners from "@/app/components/ScanCorners";
-import PageTransition from "@/app/components/PageTransition";
+import { containerVariants, itemVariants } from "@/lib/animationVariants";
+import { useHallOfShame } from "@/lib/hooks";
+import ScanCorners from "@/app/components/shared/ScanCorners";
+import PageTransition from "@/app/components/shared/PageTransition";
 
 const getSkullRating = (score: number): number => {
   return Math.max(1, 6 - Math.round(score));
-};
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.2 },
-  },
 };
 
 export default function HallOfShamePage() {

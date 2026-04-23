@@ -15,7 +15,6 @@ export default function CameraScanner({
     if (result && result.length > 0) {
       const detectedCode =
         result[0]?.rawValue || result[0]?.getText?.() || result[0];
-      console.log("Barcode scanned:", detectedCode);
       if (detectedCode) {
         onBarcodeScan(detectedCode);
       }

@@ -4,29 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { theme } from "@/lib/theme";
-import { useScanHistory } from "@/lib/useScanHistory";
-import ScanCorners from "@/app/components/ScanCorners";
-import PageTransition from "@/app/components/PageTransition";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.05,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.2 },
-  },
-};
+import { containerVariants, itemVariants } from "@/lib/animationVariants";
+import { useScanHistory } from "@/lib/hooks";
+import ScanCorners from "@/app/components/shared/ScanCorners";
+import PageTransition from "@/app/components/shared/PageTransition";
 
 export default function RecentScansPage() {
   const router = useRouter();

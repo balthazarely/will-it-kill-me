@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 export interface ScanItem {
   barcode: string;
@@ -6,7 +6,7 @@ export interface ScanItem {
   timestamp: number;
 }
 
-const STORAGE_KEY = 'scanHistory';
+const STORAGE_KEY = "scanHistory";
 const MAX_SCANS = 5;
 
 export function useScanHistory() {
