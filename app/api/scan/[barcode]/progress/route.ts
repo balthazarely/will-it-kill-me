@@ -2,16 +2,16 @@ import { progressManager, type ProgressUpdate } from "@/lib/progressManager";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ barcode: string }> }
+  { params }: { params: Promise<{ barcode: string }> },
 ) {
   const { barcode } = await params;
 
-  // Create a readable stream for SSE
+  // Create a readable stream  SSE
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
       // Send initial SSE header comment
       controller.enqueue(
-        new TextEncoder().encode(": SSE connection established\n\n")
+        new TextEncoder().encode(": SSE connection established\n\n"),
       );
 
       // Subscribe to progress updates
@@ -20,7 +20,7 @@ export async function GET(
         (update: ProgressUpdate) => {
           const data = `data: ${JSON.stringify(update)}\n\n`;
           controller.enqueue(new TextEncoder().encode(data));
-        }
+        },
       );
 
       // Handle client disconnect
@@ -35,7 +35,7 @@ export async function GET(
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
-      "Connection": "keep-alive",
+      Connection: "keep-alive",
       "Access-Control-Allow-Origin": "*",
     },
   });
