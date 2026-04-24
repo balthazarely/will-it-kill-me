@@ -9,6 +9,7 @@ interface InitialScreenProps {
   onBarcodeChange: (value: string) => void;
   onScan: () => void;
   onCameraClick: () => void;
+  onNutritionLabelClick: () => void;
 }
 
 export default function InitialScreen({
@@ -16,8 +17,16 @@ export default function InitialScreen({
   onBarcodeChange,
   onScan,
   onCameraClick,
+  onNutritionLabelClick,
 }: InitialScreenProps) {
   const [isHovering, setIsHovering] = useState(false);
+
+  const handleSearch = () => {
+    if (!barcode.trim()) {
+      return;
+    }
+    onScan();
+  };
 
   return (
     <motion.div
@@ -28,7 +37,7 @@ export default function InitialScreen({
     >
       {/* Subtitle */}
       <motion.p
-        className="text-lg max-w-sm  text-white/70 text-center"
+        className="text-lg max-w-sm text-white/70 text-center"
         variants={itemVariants}
       >
         Scan barcodes to find out if your food is trying to kill you.
@@ -36,7 +45,7 @@ export default function InitialScreen({
 
       {/* Camera Button + Input Section */}
       <motion.div
-        className="w-full max-w-sm flex flex-col gap-8"
+        className="w-full max-w-sm flex flex-col gap-4"
         variants={itemVariants}
       >
         {/* Camera Button - Large & Primary */}
@@ -44,7 +53,9 @@ export default function InitialScreen({
           onClick={onCameraClick}
           className="w-full px-8 py-6 text-white font-semibold rounded-2xl cursor-pointer text-lg shadow-lg"
           style={{
-            ...(isHovering ? theme.styles.primaryGradientHover : theme.styles.primaryGradient),
+            ...(isHovering
+              ? theme.styles.primaryGradientHover
+              : theme.styles.primaryGradient),
             transition: "background 0.15s ease",
           }}
           onMouseEnter={() => setIsHovering(true)}
@@ -61,31 +72,51 @@ export default function InitialScreen({
           <div className="flex-1 h-px bg-white/10" />
         </div>
 
-        {/* Manual Input */}
-        <div className="flex flex-col gap-3">
+        {/* Nutrition Label Button */}
+        <button
+          onClick={onNutritionLabelClick}
+          className="w-full px-8 py-4 text-red-400 font-semibold rounded-2xl cursor-pointer text-lg border border-red-500/30 hover:border-red-500/50 hover:bg-red-500/5 transition-colors"
+          title="Scan nutrition label"
+        >
+          🏷️ Scan Nutrition Label
+        </button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-xs text-white/40 font-medium">OR</span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* Manual Barcode Search */}
+        <div className="flex gap-2">
           <input
             type="text"
             inputMode="numeric"
-            placeholder="Enter barcode number"
+            placeholder="Enter barcode number..."
             value={barcode}
             onChange={(e) => onBarcodeChange(e.target.value)}
             onKeyPress={(e) => {
-              if (e.key === "Enter") onScan();
+              if (e.key === "Enter") handleSearch();
             }}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
+            className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
           />
           <button
-            onClick={onScan}
+            onClick={handleSearch}
             disabled={!barcode.trim()}
-            className="w-full px-4 py-3 bg-white/10 text-white font-medium rounded-xl hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors border border-white/10"
+            className="px-4 py-3 bg-white/5 border border-white/10 text-white font-medium rounded-xl hover:bg-white/10 hover:border-white/20 disabled:cursor-not-allowed cursor-pointer transition-colors text-lg"
+            title="Search"
           >
-            Search Barcode
+            →
           </button>
         </div>
       </motion.div>
 
       {/* Links Section */}
-      <motion.div className="w-full max-w-sm flex gap-3 mt-4" variants={itemVariants}>
+      <motion.div
+        className="w-full max-w-sm flex gap-3 mt-4"
+        variants={itemVariants}
+      >
         <Link
           href="/recent-scans"
           className="flex-1 px-3 py-2 bg-white/5 border border-white/10 text-white font-medium text-sm rounded-xl hover:bg-white/10 hover:border-white/20 cursor-pointer transition-colors text-center block"
